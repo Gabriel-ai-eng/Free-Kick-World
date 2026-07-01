@@ -1211,6 +1211,18 @@ async function loadBest(){
   }catch(_){}
 }
 
+// Lê o estado salvo do usuário no Supabase e retoma de onde parou (posição do
+// jogador/bola, placar, tempo, cena). Sem isso, o jogo sempre começava do zero.
+async function loadState(){
+  if(!sb || !gameUser) return;
+  try{
+    const { data } = await sb.from('fkw_game_state')
+      .select('state').eq('user_id', gameUser.id).limit(1);
+    const row = data && data[0];
+    if(row && row.state) applySnapshot(row.state);
+  }catch(_){ /* offline/sem estado: começa na tela inicial */ }
+}
+
 function applySnapshot(s){
   if(!s || state.scene!=='title') return;   // não sobrescreve se o usuário já começou
   if(s.player) Object.assign(player, s.player);
@@ -1273,7 +1285,7 @@ async function initPersistence(){
     if(!ensureClient()){ show('title'); return; }     // sem config: joga sem salvar
     const { data } = await sb.auth.getUser();
     gameUser = (data && data.user) ? data.user : null;
-    if(gameUser){ updateAuthUI(); await loadBest(); show('title'); state.scene='title'; }
+    if(gameUser){ updateAuthUI(); await loadBest(); show('title'); state.scene='title'; await loadState(); }
     else { show('login'); }                            // sem sessão: pede login
   }catch(_){ show('title'); }                          // offline: segue sem persistência
 }
@@ -1295,7 +1307,7 @@ if(loginForm) loginForm.addEventListener('submit', async (e)=>{
     gameUser = (data && data.user) ? data.user : null;
     updateAuthUI(); await loadBest();
     document.getElementById('loginPass').value='';
-    show('title'); state.scene='title';
+    show('title'); state.scene='title'; await loadState();
   }catch(err){ errEl.textContent=traduzErroAuth(err); }
   finally{ btn.disabled=false; btn.textContent='ENTRAR'; }
 });
@@ -1313,7 +1325,7 @@ if(authStatusBtn) authStatusBtn.onclick=async ()=>{
 };
 
 // Autosave periódico durante a partida + salvar ao ocultar/sair a aba.
-setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 5000);
+setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 3000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveNow(); });
 window.addEventListener('pagehide', ()=>{ saveNow(); });
 
