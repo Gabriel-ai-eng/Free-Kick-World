@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Free Kick World ⚽</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+      user-select:none; -webkit-user-select:none; touch-action:none; }
+  html,body { width:100%; height:100%; background:#05080f; overflow:hidden;
+    font-family:'Courier New', ui-monospace, monospace; color:#e2e8f0; }
+  #cv { position:fixed; inset:0; width:100%; height:100%; display:block; background:#05080f; }
+
+  /* ---------- Telas (menus) ---------- */
+  .screen { position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:24px;
+    background:rgba(5,8,15,.86); text-align:center; z-index:20; }
+  .hidden { display:none !important; }
+
+  /* ---------- Tela de TÍTULO: imagem cheia (arte do FKW) + hotspots ---------- */
+  #scrTitle { padding:0; gap:0; background:#05080f; }
+  #titleWrap { position:relative; line-height:0; }
+  #titleImg { display:block; max-width:100vw; max-height:100vh; width:auto; height:auto; }
+  /* Áreas clicáveis transparentes sobre os botões desenhados na arte */
+  .hotspot { position:absolute; background:transparent; border:none; padding:0; margin:0;
+    cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  #startGame  { left:5%;    top:42.5%; width:22.5%; height:10%; }
+  #startQuick { left:75.5%; top:71%;   width:19%;   height:16%; }
+  h1 { font-size:clamp(30px,7vw,66px); letter-spacing:3px; color:#7dd3fc;
+    text-shadow:3px 3px 0 #0a3d62, 6px 6px 0 rgba(0,0,0,.5); }
+  h2 { font-size:clamp(18px,4vw,30px); color:#fcd34d; letter-spacing:2px; }
+  p.sub { color:#cbd5e1; max-width:560px; line-height:1.55; font-size:15px; }
+  .btn { font-family:inherit; cursor:pointer; border:none; padding:14px 26px;
+    font-size:clamp(15px,3.5vw,20px); letter-spacing:2px; color:#06251c;
+    background:#34d399; border-bottom:5px solid #059669; border-radius:10px;
+    text-transform:uppercase; transition:transform .06s; }
+  .btn:active { transform:translateY(3px); border-bottom-width:2px; }
+  .btn.alt  { background:#7dd3fc; border-bottom-color:#0284c7; }
+  .btn.ghost{ background:#1e293b; color:#cbd5e1; border-bottom-color:#0f172a; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
+  small.hint { color:#64748b; font-size:12px; max-width:520px; }
+
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; top:10px; left:0; right:0; z-index:8; display:none;
+    justify-content:space-between; padding:0 14px; pointer-events:none;
+    font-size:clamp(15px,3.6vw,22px); letter-spacing:1px; }
+  #hud.on { display:flex; }
+  #hud .chip { background:rgba(5,8,15,.6); padding:6px 12px; border-radius:8px; color:#fcd34d; }
+  #hud .chip.time { color:#7dd3fc; }
+  #hud .chip.half { color:#fff; font-weight:700; letter-spacing:2px; border:1px solid rgba(255,255,255,.25); }
+  #msg { position:fixed; top:30%; left:0; right:0; text-align:center; z-index:9;
+    font-size:clamp(34px,10vw,80px); color:#fcd34d; letter-spacing:5px;
+    text-shadow:3px 3px 0 #7c2d12; pointer-events:none; opacity:0; transition:opacity .18s; }
+
+  /* ---------- Controles na tela ---------- */
+  #pad { position:fixed; inset:0; z-index:7; display:none; pointer-events:none; }
+  #pad.on { display:block; }
+  #stick { position:absolute; bottom:22px; left:22px; width:104px; height:104px;
+    border-radius:50%; background:rgba(148,163,184,.16); border:3px solid rgba(148,163,184,.45);
+    pointer-events:auto; }
+  #knob { position:absolute; width:44px; height:44px; border-radius:50%; left:30px; top:30px;
+    background:rgba(125,211,252,.55); border:3px solid rgba(125,211,252,.9); }
+  /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR */
+  .actbtn { position:absolute; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-family:inherit; font-weight:bold; letter-spacing:1px;
+    color:#06251c; pointer-events:auto; transition:transform .06s; }
+  .actbtn:active { transform:scale(.9); }
+  #kick { bottom:24px; right:24px; width:84px; height:84px; font-size:15px;
+    background:rgba(52,211,153,.55); border:4px solid #059669; }
+  #jump { bottom:30px; right:116px; width:72px; height:72px; font-size:14px;
+    background:rgba(125,211,252,.5); border:4px solid #0284c7; }
+
+  /* ---------- Zoom da câmera (Longe / Perto) ---------- */
+  #zoom { position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    display:flex; gap:10px; pointer-events:auto; }
+  #zoom button { font-family:inherit; cursor:pointer; padding:6px 14px;
+    font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#e2e8f0;
+    background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4);
+    border-radius:999px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    transition:transform .08s; }
+  #zoom button:active { transform:scale(.92); }
+  #zoom button:disabled { opacity:.4; }
+
+  /* ---------- Botão Voltar (para a Home) ---------- */
+  #backBtn { position:fixed; top:10px; left:10px; z-index:60; font-family:inherit;
+    cursor:pointer; display:flex; align-items:center; gap:4px; padding:5px 11px;
+    font-size:12px; letter-spacing:.5px; color:#e2e8f0; background:rgba(5,8,15,.5);
+    border:1px solid rgba(148,163,184,.4); border-radius:999px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
+  #backBtn:active { transform:scale(.93); }
+
+  /* ---------- Overlay: gire o celular para a horizontal ---------- */
+  #rotate { position:fixed; inset:0; z-index:50; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
+    background:radial-gradient(circle at 50% 38%, #0b1424, #05080f); text-align:center; }
+  @media (orientation:portrait) { #rotate { display:flex; } }
+  #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
+    text-shadow:2px 2px 0 #0a3d62; }
+  #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
+  .phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
+    position:relative; box-shadow:0 0 26px rgba(125,211,252,.5);
+    animation:tilt 2.4s ease-in-out infinite; }
+  .phone::before { content:''; position:absolute; left:50%; bottom:7px; width:20px; height:4px;
+    border-radius:3px; background:#7dd3fc; transform:translateX(-50%); }
+  .phone::after { content:''; position:absolute; inset:7px; border-radius:7px;
+    background:rgba(125,211,252,.12); }
+  @keyframes tilt {
+    0%,16%   { transform:rotate(0deg); }
+    46%,72%  { transform:rotate(-90deg); }
+    96%,100% { transform:rotate(0deg); }
+  }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- Voltar para a Home -->
+<button id="backBtn">← Voltar</button>
+
+<!-- Gire o celular -->
+<div id="rotate">
+  <div class="phone"></div>
+  <h2>VIRE O CELULAR</h2>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="chip">⚽ GOLS: <span id="score">0</span></div>
+  <div class="chip half" id="half" style="display:none">1º TEMPO</div>
+  <div class="chip time">⏱ <span id="time">60</span></div>
+</div>
+<div id="msg"></div>
+
+<!-- Controles -->
+<div id="pad">
+  <div id="zoom">
+    <button id="camToggle">🔍 Perto</button>
+  </div>
+  <div id="stick"><div id="knob"></div></div>
+  <div id="jump" class="actbtn">PULAR</div>
+  <div id="kick" class="actbtn">CHUTAR</div>
+</div>
+
+<!-- TÍTULO (arte cheia do FKW + hotspots sobre JOGAR / INICIAR) -->
+<div id="scrTitle" class="screen">
+  <div id="titleWrap">
+    <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
+    <button class="hotspot" id="startGame" aria-label="Jogar"></button>
+    <button class="hotspot" id="startQuick" aria-label="Iniciar partida rápida"></button>
+  </div>
+</div>
+
+<!-- FIM -->
+<div id="scrEnd" class="screen hidden">
+  <h1 style="color:#fcd34d">FIM DE JOGO</h1>
+  <h2 id="endScore">Você marcou 0 gols!</h2>
+  <div class="row">
+    <button class="btn" id="playAgain">JOGAR DE NOVO</button>
+  </div>
+</div>
+
+<!-- TABELA (placeholder — conteúdo virá depois) -->
+<div id="scrTabela" class="screen hidden">
+  <h1 style="color:#7dd3fc">TABELA</h1>
+  <h2>Em breve 📊</h2>
+  <p class="sub">A classificação vai aparecer aqui em breve.</p>
+  <button class="btn ghost" id="tabelaBack">VOLTAR</button>
+</div>
+
+<!-- Config do Supabase (gerada pelo Vite a partir das env do app) + cliente supabase-js -->
+<script src="supabase-config.js"></script>
+<script src="vendor/supabase.min.js"></script>
+
+<script>
+"use strict";
+/* =========================================================================
+   FREE KICK WORLD — Canvas 2D, sem dependências.
+   Estádio em foto pixel art + personagem (sprite sheet) com perspectiva.
+   Joystick à esquerda, botão de chute à direita, rosto personalizável.
+   ========================================================================= */
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+let CW=0, CH=0, DPR=1;
+function resize(){
+  // Renderiza na densidade real da tela (retina) → alta resolução, nada de "serrilhado".
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  CW = Math.floor(window.innerWidth);
+  CH = Math.floor(window.innerHeight);
+  cv.width  = Math.floor(CW * DPR);
+  cv.height = Math.floor(CH * DPR);
+  cv.style.width  = CW + 'px';
+  cv.style.height = CH + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);   // desenhamos em px de CSS; o canvas escala sozinho
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+}
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', resize);
+resize();
+
+// Em retrato mostramos o aviso "vire o celular" e pausamos a partida.
+const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
+
+// ---------- Assets ----------
+// O estádio NÃO é mais uma imagem única: é recriado proceduralmente (ver módulo
+// `Stadium` abaixo). Só os sprites do personagem são carregados como imagem.
+const A = { walk:new Image(), runner:new Image(), kick:new Image(), jump:new Image(), loaded:0, need:4 };
+A.walk.src    = 'assets/player_walk.png';
+A.runner.src  = 'assets/player_run.png';
+A.kick.src    = 'assets/player_kick.png';
+A.jump.src    = 'assets/player_jump.png';
+A.walk.onload = A.runner.onload = A.kick.onload = A.jump.onload = ()=> A.loaded++;
+
+// Imagem do gramado (foto em perspectiva). Carregada à parte, SEM travar o loop:
+// se falhar, o gramado cai no desenho procedural (fallback em GrassTileMap).
+// Geometria do trapézio verde DENTRO da imagem (frações da imagem), medida da
+// própria foto — usada para mapear a grama no campo com a perspectiva certa.
+const pitchImg = new Image();
+pitchImg.src = 'assets/pitch-grass.png';
+const PITCH_IMG = { topY:0.266, botY:0.668, topL:0.289, topR:0.711, botL:0.046, botR:0.954 };
+pitchImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
+
+// Imagens dos gols (frames em perspectiva, fundo transparente). Carregadas à
+// parte; se faltarem, os gols caem no desenho procedural (fallback em Goals()).
+// Âncoras = posição das BASES das traves DENTRO da imagem (frações da imagem):
+// near = trave da frente (mais baixa), far = trave do fundo (mais alta).
+const goalLeftImg = new Image();  goalLeftImg.src  = 'assets/goal-left.png';
+const goalRightImg = new Image(); goalRightImg.src = 'assets/goal-right.png';
+const GOAL_ANCH = {
+  left:  { nearX:0.049, nearY:0.998, farX:0.920, farY:0.493 },
+  right: { nearX:0.938, nearY:0.998, farX:0.049, farY:0.493 },
+};
+goalLeftImg.onload = goalRightImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
+
+// Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
+// 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
+// direita; ao fim da linha, segue na linha de baixo. Sem reorganizar/cortar/inverter.
+const WALK_SH = { FW:340, FH:664, cols:9, rows:5, frames:43 };
+// Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
+// Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
+const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
+// Sprite sheet de CHUTE PARADO: 12 colunas x 15 linhas = 180 quadros (perfil p/
+// direita), alinhados pelo tronco (estavel) com os pes na base.
+const KICK_SH = { FW:273, FH:273, cols:12, rows:15, frames:180 };
+const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
+const KICK_CONTACT = 122;    // FRAME EXATO do contato: o pe encosta na bola (evento de animacao)
+const KICK_FOOT_DX = 0.406;  // posicao do pe NESSE frame: fracao da largura do sprite a frente do centro
+// Sprite sheet de PULO: 15 colunas x 14 linhas = 200 quadros (perfil p/ direita),
+// alinhados pelo tronco e pes na base. O arco vertical do pulo NAO esta embutido:
+// a altura (z) e gerada por codigo e sincronizada com a animacao (decolagem ->
+// aterrissagem) atraves de um EVENTO de animacao por frame.
+const JUMP_SH = { FW:172, FH:291, cols:15, rows:14, frames:200 };
+const JUMP_FPS = 185;        // velocidade de reproducao da animacao de pulo
+const JUMP_TO = 57;          // frame de DECOLAGEM (pes saem do chao)
+const JUMP_LD = 168;         // frame de ATERRISSAGEM (pes tocam o chao)
+const JUMP_Z = 0.6;          // altura do pulo: fracao da altura do personagem
+
+// ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
+const PITCH = {
+  TL:{x:0.215,y:0.550}, TR:{x:0.785,y:0.550},
+  BR:{x:0.955,y:0.895}, BL:{x:0.045,y:0.895},
+};
+// Espaço virtual do estádio (aspecto preservado do original ~1.54) — o PITCH é
+// normalizado nele, então o alinhamento do campo continua idêntico. Resolução
+// alta para captar público denso, texto dos painéis e múltiplos níveis.
+const STADIUM_W = 1600, STADIUM_H = 1038;
+let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (cover)
+function layoutStadium(){
+  // "cover": preenche a tela inteira, sem bordas pretas. Alinhado pela BASE
+  // (mostra o campo e corta o topo da arquibancada quando sobra altura).
+  const s = Math.max(CW/STADIUM_W, CH/STADIUM_H) || 1;
+  img.dw = STADIUM_W*s; img.dh = STADIUM_H*s;
+  img.dx = (CW-img.dw)/2; img.dy = CH-img.dh;
+}
+const lerp=(a,b,t)=>a+(b-a)*t;
+// (u,v) no campo: u=0 esquerda→1 direita; v=0 fundo(longe)→1 frente(perto)
+function uvToScreen(u,v){
+  const tx=lerp(PITCH.TL.x,PITCH.TR.x,u), ty=lerp(PITCH.TL.y,PITCH.TR.y,u);
+  const bx=lerp(PITCH.BL.x,PITCH.BR.x,u), by=lerp(PITCH.BL.y,PITCH.BR.y,u);
+  const nx=lerp(tx,bx,v), ny=lerp(ty,by,v);
+  return { x: img.dx + nx*img.dw, y: img.dy + ny*img.dh };
+}
+// escala do personagem conforme a profundidade (perto = maior)
+function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sprite em px
+
+// =========================================================================
+//  ESTÁDIO PROCEDURAL MODULAR
+// -------------------------------------------------------------------------
+//  Em vez de uma imagem única, o estádio é recriado por código em CAMADAS
+//  independentes (céu, arquibancadas, público, painéis, gramado, linhas,
+//  traves/redes, luzes, sombras, clima). Tudo é controlado por `Stadium.cfg`.
+//  As camadas estáticas são pintadas UMA vez num canvas offscreen (de tamanho
+//  fixo STADIUM_W×STADIUM_H) e depois só "blitadas" a cada frame; o clima é
+//  dinâmico (por frame). Para mudar QUALQUER coisa, ajuste cfg e chame
+//  Stadium.rebuild() — sem recriar o resto. Ex.: Stadium.cfg.grass.snow=0.6;
+//  Stadium.cfg.weather.type='snow'; Stadium.rebuild();
+// =========================================================================
+const Stadium = {
+  W: STADIUM_W, H: STADIUM_H,
+  // --- CONFIG: tudo controlável por código. Mude e chame Stadium.rebuild(). ---
+  cfg: {
+    sky:    { top:'#02040f', mid:'#06122a', stars:130 },
+    struct: { roof:'#0a1322', truss:'#22324e', facade:'#0a1320', shadow:0.5 },
+    crowd:  { density:0.62,
+              people:[[232,150,68],[245,198,86],[70,120,182],[120,165,212],[224,231,241],[198,86,70],[96,152,112],[176,192,214],[150,170,200],[210,170,120]],
+              seats:[[19,32,56],[15,26,46],[25,40,68],[11,20,38]],
+              tiers:[0.245,0.32,0.40,0.475], concourse:'#04070e', rail:'#7188af', exit:'#37d268', vom:'#02030a' },
+    boards: { bg:'#12409a', bg2:'#0a2a66', edge:'#3a6fd0', y1:'#ffe14d', w:'#ffffff',
+              msgs:['PIXEL SPORT','BRASIL FUTEBOL'] },
+    grass:  { light:'#52b657', dark:'#3b9444', stripes:18, mow:'vertical',
+              pool:'#dcf4b4', poolA:0.13, noise:0.5, wear:0, mud:0, snow:0 },
+    lines:  { color:'#f3faf5', width:2.6, inset_u:0.03, inset_v:0.045 },
+    goals:  { post:'#f5f9fd', net:'190,202,222', depth:0.05, vH:0.072, gh:0.06,
+              imgScale:2.4, imgLift:0.0 },  // imgScale: ajuste fino de tamanho (1=encaixe exato nas traves); imgLift: sobe/desce a base
+    lights: { intensity:0.55, color:'#e6f0ff', pools:5,
+              towerL:[0.06,0.06], towerR:[0.94,0.06], strip:[0.17,0.83,0.15] },
+    shadows:{ vignette:0.5, rim:0.45 },
+    weather:{ type:'none', intensity:0.5 },   // 'none' | 'rain' | 'snow' | 'fog'
+  },
+  cv:null, c:null, built:false, pitch:null, _w:{ parts:[], t:0 },
+
+  uv(u,v){ const P=this.pitch;
+    const tx=lerp(P.TL.x,P.TR.x,u), ty=lerp(P.TL.y,P.TR.y,u);
+    const bx=lerp(P.BL.x,P.BR.x,u), by=lerp(P.BL.y,P.BR.y,u);
+    return { x:lerp(tx,bx,v), y:lerp(ty,by,v) };
+  },
+  pitchPath(c, inset){ const k=inset||0;
+    const a=this.uv(k,k*0.6), b=this.uv(1-k,k*0.6), d=this.uv(1-k,1-k*0.6), e=this.uv(k,1-k*0.6);
+    c.beginPath(); c.moveTo(a.x,a.y); c.lineTo(b.x,b.y); c.lineTo(d.x,d.y); c.lineTo(e.x,e.y); c.closePath();
+  },
+
+  build(){
+    if(!this.cv){ this.cv=document.createElement('canvas'); this.cv.width=this.W; this.cv.height=this.H; this.c=this.cv.getContext('2d'); }
+    const c=this.c; c.clearRect(0,0,this.W,this.H);
+    this.pitch={ TL:{x:PITCH.TL.x*this.W,y:PITCH.TL.y*this.H}, TR:{x:PITCH.TR.x*this.W,y:PITCH.TR.y*this.H},
+                 BR:{x:PITCH.BR.x*this.W,y:PITCH.BR.y*this.H}, BL:{x:PITCH.BL.x*this.W,y:PITCH.BL.y*this.H} };
+    const L=this.L;
+    L.Sky(this,c);                 // céu noturno + estrelas
+    L.UpperCrowd(this,c);          // arquibancada superior (vários níveis)
+    L.LowerCrowd(this,c);          // nível inferior + laterais + faixa próxima
+    L.StadiumStructure(this,c);    // teto, treliças, fachada
+    L.StadiumLights(this,c);       // torres de refletor + faixa de LED + brilho
+    L.Billboards(this,c);          // painéis publicitários (objetos independentes)
+    L.GrassTileMap(this,c);        // gramado modular com variação
+    L.FieldLinesProcedural(this,c);// linhas desenhadas proceduralmente
+    L.Goals(this,c);               // traves + redes (cenas independentes)
+    L.DynamicShadows(this,c);      // sombras ambientais + vinheta
+    this.built=true;
+  },
+  rebuild(){ this.built=false; this.build(); },
+
+  // Público denso via ImageData (rápido e fino) — preenche região [y0,y1].
+  _crowd(c, y0, y1){
+    const W=this.W; y0=Math.max(0,y0|0); y1=Math.min(this.H,y1|0); if(y1<=y0) return;
+    const reg=c.getImageData(0,y0,W,y1-y0), d=reg.data, k=this.cfg.crowd, ppl=k.people, st=k.seats;
+    const yTop=this.H*0.17, yPit=this.H*0.55;
+    for(let y=y0;y<y1;y+=2){
+      const f=Math.max(0,Math.min(1,(y-yTop)/(yPit-yTop))), bright=0.42+0.58*f;
+      for(let x=0;x<W;x+=2){
+        const edge=0.55+0.45*(1-Math.min(1,Math.abs(x-W/2)/(W*0.62)));
+        const col = (Math.random()<k.density) ? ppl[(Math.random()*ppl.length)|0] : st[(Math.random()*st.length)|0];
+        const m=bright*edge*(0.78+0.44*Math.random());
+        const r=Math.min(255,col[0]*m)|0, g=Math.min(255,col[1]*m)|0, b=Math.min(255,col[2]*m)|0;
+        for(let dy=0;dy<2 && (y+dy)<y1;dy++){ let o=((y+dy-y0)*W+x)*4;
+          for(let dx=0;dx<2 && (x+dx)<W;dx++){ d[o]=r; d[o+1]=g; d[o+2]=b; d[o+3]=255; o+=4; } }
+      }
+    }
+    c.putImageData(reg,0,y0);
+  },
+
+  // ---- CAMADAS ----
+  L:{
+    Sky(S,c){
+      const k=S.cfg.sky, W=S.W, H=S.H;
+      const g=c.createLinearGradient(0,0,0,H*0.20); g.addColorStop(0,k.top); g.addColorStop(1,k.mid);
+      c.fillStyle=g; c.fillRect(0,0,W,H*0.20);
+      for(let i=0;i<k.stars;i++){ c.globalAlpha=Math.random()*0.7+0.2; c.fillStyle='#fff'; c.fillRect(Math.random()*W, Math.random()*H*0.12, 1.5,1.5); }
+      c.globalAlpha=1;
+    },
+    UpperCrowd(S,c){
+      const k=S.cfg.crowd, W=S.W, H=S.H;
+      S._crowd(c, H*0.17, H*0.505);
+      // divisórias dos níveis (concourse) curvas, com corrimão, vomitórios e saídas
+      const div=(yf)=>{ const baseY=yf*H, amp=H*0.016, hh=H*0.013;
+        const yc=x=> baseY - amp*Math.pow(2*x/W-1,2);
+        c.fillStyle=k.concourse; c.beginPath();
+        for(let x=0;x<=W;x+=8){ const yy=yc(x); x===0?c.moveTo(x,yy):c.lineTo(x,yy); }
+        for(let x=W;x>=0;x-=8){ c.lineTo(x, yc(x)+hh); } c.closePath(); c.fill();
+        c.strokeStyle=k.rail; c.globalAlpha=0.55; c.lineWidth=1.5; c.beginPath();
+        for(let x=0;x<=W;x+=8){ const yy=yc(x); x===0?c.moveTo(x,yy):c.lineTo(x,yy);} c.stroke(); c.globalAlpha=1;
+        for(let i=0;i<16;i++){ const x=(i+0.5)/16*W, yy=yc(x);
+          c.fillStyle=k.vom; c.fillRect(x-7, yy-H*0.026, 14, H*0.026);
+          c.fillStyle=k.exit; c.fillRect(x-2, yy-3, 4, 3); }
+      };
+      k.tiers.forEach(div);
+    },
+    LowerCrowd(S,c){
+      S._crowd(c, S.H*0.505, S.H);   // nível inferior + laterais (cobertos no centro pelo campo)
+    },
+    StadiumStructure(S,c){
+      const k=S.cfg.struct, W=S.W, H=S.H;
+      // teto
+      c.fillStyle=k.roof; c.fillRect(0,0,W,H*0.135);
+      // treliças (diagonais + vigas)
+      c.strokeStyle=k.truss; c.globalAlpha=0.7; c.lineWidth=2;
+      for(let x=0;x<W;x+=30){ c.beginPath(); c.moveTo(x,H*0.03); c.lineTo(x+30,H*0.125); c.stroke();
+                              c.beginPath(); c.moveTo(x+30,H*0.03); c.lineTo(x,H*0.125); c.stroke(); }
+      c.beginPath(); c.moveTo(0,H*0.03); c.lineTo(W,H*0.03); c.moveTo(0,H*0.125); c.lineTo(W,H*0.125); c.stroke();
+      c.globalAlpha=1;
+      // fachada escura entre teto e arquibancada
+      c.fillStyle=k.facade; c.fillRect(0,H*0.135,W,H*0.035);
+      // sombra inferior do teto
+      c.fillStyle=`rgba(0,0,0,${k.shadow})`; c.fillRect(0,H*0.125,W,H*0.012);
+    },
+    StadiumLights(S,c){
+      const k=S.cfg.lights, W=S.W, H=S.H;
+      // faixa de LED no topo do estádio
+      const s0=k.strip[0]*W, s1=k.strip[1]*W, yy=k.strip[2]*H;
+      c.fillStyle=k.color; for(let x=s0;x<s1;x+=W*0.012){ c.globalAlpha=0.92; c.fillRect(x,yy,W*0.0075,H*0.014); }
+      c.globalAlpha=1;
+      c.save(); c.globalCompositeOperation='lighter';
+      const sg=c.createLinearGradient(0,yy-H*0.05,0,yy+H*0.06);
+      sg.addColorStop(0,'rgba(0,0,0,0)'); sg.addColorStop(0.5,'rgba(200,222,255,0.45)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=sg; c.fillRect(s0,yy-H*0.05,s1-s0,H*0.11);
+      // torres de refletor (cantos)
+      for(const t of [k.towerL,k.towerR]){
+        const X=t[0]*W, Y=t[1]*H;
+        c.globalCompositeOperation='source-over'; c.fillStyle='#0a1020'; c.fillRect(X-W*0.05,Y-H*0.022,W*0.10,H*0.052);
+        c.fillStyle=k.color; for(let i=0;i<6;i++)for(let j=0;j<4;j++){ c.globalAlpha=0.95; c.fillRect(X-W*0.043+i*W*0.015, Y-H*0.017+j*H*0.012, W*0.009, H*0.0075); }
+        c.globalAlpha=1; c.globalCompositeOperation='lighter';
+        const g=c.createRadialGradient(X,Y,4,X,Y,W*0.17); g.addColorStop(0,'rgba(220,235,255,0.8)'); g.addColorStop(1,'rgba(0,0,0,0)');
+        c.fillStyle=g; c.fillRect(X-W*0.22,Y-H*0.28,W*0.44,H*0.5);
+      }
+      c.globalAlpha=1; c.restore();
+    },
+    Billboards(S,c){
+      const k=S.cfg.boards;
+      const far=S.uv(0.5,0).y, near=S.uv(0.5,1).y;
+      S._board(c, S.uv(0,0).x, S.uv(1,0).x, far - S.H*0.03,  S.H*0.028, k, false);  // longe (atrás)
+      S._board(c, S.uv(0,1).x, S.uv(1,1).x, near + S.H*0.004, S.H*0.04,  k, true);   // perto (frente)
+    },
+    GrassTileMap(S,c){
+      const g=S.cfg.grass; c.save(); S.pitchPath(c,0); c.clip();
+      c.fillStyle=g.dark; c.fillRect(0,0,S.W,S.H);
+      const im = (typeof pitchImg!=='undefined') ? pitchImg : null;
+      if(im && im.complete && im.naturalWidth>0){
+        // ---- Gramado por FOTO (mapeada no trapézio do campo, com perspectiva) ----
+        // Faixas horizontais: cada faixa amostra a linha correspondente do campo
+        // verde da imagem e a estica para a largura do campo naquela profundidade.
+        const iw=im.naturalWidth, ih=im.naturalHeight, K=PITCH_IMG;
+        const sTopY=K.topY*ih, sBotY=K.botY*ih;
+        const sTopL=K.topL*iw, sTopR=K.topR*iw, sBotL=K.botL*iw, sBotR=K.botR*iw;
+        const N=72; c.imageSmoothingEnabled=true;
+        for(let i=0;i<N;i++){
+          const t0=i/N, t1=(i+1)/N, tm=(t0+t1)/2;
+          const sy0=lerp(sTopY,sBotY,t0), sy1=lerp(sTopY,sBotY,t1);
+          const sl=lerp(sTopL,sBotL,tm),  sr=lerp(sTopR,sBotR,tm);
+          const dL0=S.uv(0,t0), dR0=S.uv(1,t0), dL1=S.uv(0,t1);
+          const dx=dL0.x, dw=dR0.x-dL0.x, dy=dL0.y, dh=(dL1.y-dL0.y);
+          // -0.5/+1: leve sobreposição p/ não deixar costura entre as faixas
+          c.drawImage(im, sl, sy0, sr-sl, Math.max(1,sy1-sy0), dx, dy-0.5, dw, dh+1);
+        }
+      } else {
+        // ---- Fallback procedural (caso a foto não carregue) ----
+        const band=(u0,u1,v0,v1,col)=>{ const a=S.uv(u0,v0),b=S.uv(u1,v0),d=S.uv(u1,v1),e=S.uv(u0,v1);
+          c.fillStyle=col; c.beginPath(); c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d.x,d.y);c.lineTo(e.x,e.y);c.closePath();c.fill(); };
+        // faixas de corte (mow)
+        if(g.mow==='horizontal'){ for(let i=0;i<g.stripes;i++) if(i%2===0) band(0,1,i/g.stripes,(i+1)/g.stripes,g.light); }
+        else if(g.mow==='checker'){ for(let i=0;i<g.stripes;i++)for(let j=0;j<g.stripes;j++) if((i+j)%2===0) band(i/g.stripes,(i+1)/g.stripes,j/g.stripes,(j+1)/g.stripes,g.light); }
+        else { for(let i=0;i<g.stripes;i++) if(i%2===0) band(i/g.stripes,(i+1)/g.stripes,0,1,g.light); }
+        // variação de tiles (textura de grama) — pontinhos claros/escuros
+        if(g.noise>0){ for(let n=0;n<5000;n++){ const u=Math.random(),v=Math.random(),p=S.uv(u,v);
+          c.globalAlpha=Math.random()*g.noise*0.22; c.fillStyle=Math.random()<0.5?'#bdea96':'#236a2c'; c.fillRect(p.x,p.y,2,2); } c.globalAlpha=1; }
+      }
+      // poça de luz dos refletores
+      const ctr=S.uv(0.5,0.5), lp=c.createRadialGradient(ctr.x,ctr.y,S.H*0.04,ctr.x,ctr.y,S.W*0.5);
+      lp.addColorStop(0,g.pool); lp.addColorStop(1,'rgba(0,0,0,0)'); c.globalAlpha=g.poolA; c.fillStyle=lp; c.fillRect(0,0,S.W,S.H); c.globalAlpha=1;
+      // overlays ambientais opcionais (controláveis por código)
+      if(g.wear>0){ c.globalAlpha=g.wear*0.5; for(let i=0;i<800;i++){ const p=S.uv(Math.random(),Math.random()); c.fillStyle=Math.random()<0.5?'#6b7a3a':'#7a6a40'; c.fillRect(p.x,p.y,2,2);} c.globalAlpha=1; }
+      if(g.mud>0){ c.globalAlpha=g.mud; for(let i=0;i<70;i++){ const p=S.uv(0.5+(Math.random()-0.5)*0.6,0.5+(Math.random()-0.5)*0.7); c.fillStyle='#4a3826'; c.beginPath(); c.ellipse(p.x,p.y,10+Math.random()*16,5+Math.random()*8,0,0,7); c.fill(); } c.globalAlpha=1; }
+      if(g.snow>0){ c.globalAlpha=g.snow; c.fillStyle='#eef4ff'; c.fillRect(0,0,S.W,S.H); c.globalAlpha=1; }
+      c.restore();
+    },
+    FieldLinesProcedural(S,c){
+      const L=S.cfg.lines, iu=L.inset_u, iv=L.inset_v;
+      c.strokeStyle=L.color; c.fillStyle=L.color; c.lineWidth=L.width; c.lineJoin='round'; c.lineCap='round';
+      const path=(pts,close)=>{ c.beginPath(); pts.forEach((q,i)=>{const p=S.uv(q[0],q[1]); i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);}); if(close)c.closePath(); c.stroke(); };
+      const dot=(u,v,r)=>{ const p=S.uv(u,v); c.beginPath(); c.arc(p.x,p.y,r||3,0,7); c.fill(); };
+      const ellipse=(cu,cv,ru,rv,a0,a1)=>{ const N=48,pts=[]; a0=a0||0; a1=(a1==null?Math.PI*2:a1);
+        for(let i=0;i<=N;i++){ const a=a0+(a1-a0)*i/N; pts.push([cu+ru*Math.cos(a), cv+rv*Math.sin(a)]); } path(pts,false); };
+      path([[iu,iv],[1-iu,iv],[1-iu,1-iv],[iu,1-iv]], true);            // limite
+      path([[0.5,iv],[0.5,1-iv]], false);                               // linha do meio
+      ellipse(0.5,0.5,0.115,0.165); dot(0.5,0.5,3);                     // círculo + marca central
+      for(const s of [0,1]){ const sgn=s?-1:1, base=s?1-iu:iu, bx=base+sgn*0.165, gx=base+sgn*0.072;
+        path([[base,0.26],[bx,0.26],[bx,0.74],[base,0.74]], false);      // grande área
+        path([[base,0.39],[gx,0.39],[gx,0.61],[base,0.61]], false);      // pequena área
+        dot(base+sgn*0.11, 0.5, 2.6);                                    // marca do pênalti
+        ellipse(base+sgn*0.11, 0.5, 0.052, 0.075, s?Math.PI*0.62:-Math.PI*0.38, s?Math.PI*1.38:Math.PI*0.38);
+      }
+      ellipse(iu,iv,0.018,0.026,0,Math.PI/2); ellipse(1-iu,iv,0.018,0.026,Math.PI/2,Math.PI);
+      ellipse(1-iu,1-iv,0.018,0.026,Math.PI,Math.PI*1.5); ellipse(iu,1-iv,0.018,0.026,Math.PI*1.5,Math.PI*2);
+    },
+    Goals(S,c){
+      const k=S.cfg.goals, iu=S.cfg.lines.inset_u, vh=k.vH, gh=S.H*k.gh;
+      const goal=(side)=>{ const sgn=side?-1:1, gl=side?1-iu:iu, back=gl - sgn*k.depth, v0=0.5-vh, v1=0.5+vh;
+        const fb1=S.uv(gl,v0), fb2=S.uv(gl,v1), bb1=S.uv(back,v0), bb2=S.uv(back,v1);
+        const im = side? goalRightImg : goalLeftImg;
+        // ---- Gol por IMAGEM (frame em perspectiva) ----
+        if(im && im.complete && im.naturalWidth>0){
+          const A = side? GOAL_ANCH.right : GOAL_ANCH.left;
+          const near=fb2, far=fb1;   // bases das traves no campo: near (frente/baixa), far (fundo/alta)
+          const sc = k.imgScale||1;
+          // resolve dw/dh para as âncoras near/far caírem EXATAMENTE nas bases das
+          // traves do campo (a imagem já está no ângulo certo → sem distorção).
+          const dw=((far.x-near.x)/(A.farX-A.nearX))*sc;
+          const dh=((far.y-near.y)/(A.farY-A.nearY))*sc;
+          const dx = near.x - A.nearX*dw;
+          const dy = near.y - A.nearY*dh - dh*(k.imgLift||0);
+          c.imageSmoothingEnabled=true;
+          c.drawImage(im, dx, dy, dw, dh);
+          return;
+        }
+        // ---- Fallback procedural (traves + rede) ----
+        const ft1={x:fb1.x,y:fb1.y-gh}, ft2={x:fb2.x,y:fb2.y-gh}, bt1={x:bb1.x,y:bb1.y-gh*0.9}, bt2={x:bb2.x,y:bb2.y-gh*0.9};
+        S.L.Nets(S,c,{fb1,fb2,bb1,bb2,ft1,ft2,bt1,bt2});
+        c.strokeStyle=k.post; c.lineWidth=Math.max(2.5,S.H*0.005); c.lineCap='round'; c.lineJoin='round';
+        c.beginPath(); c.moveTo(fb1.x,fb1.y); c.lineTo(ft1.x,ft1.y); c.lineTo(ft2.x,ft2.y); c.lineTo(fb2.x,fb2.y); c.stroke(); // postes+travessão frente
+        c.beginPath(); c.moveTo(ft1.x,ft1.y); c.lineTo(bt1.x,bt1.y); c.lineTo(bt2.x,bt2.y); c.lineTo(ft2.x,ft2.y); c.stroke(); // topo p/ trás
+        c.beginPath(); c.moveTo(bb1.x,bb1.y); c.lineTo(bt1.x,bt1.y); c.moveTo(bb2.x,bb2.y); c.lineTo(bt2.x,bt2.y); c.stroke(); // postes de trás
+      };
+      goal(0); goal(1);
+    },
+    Nets(S,c,g){
+      c.save(); c.strokeStyle=`rgba(${S.cfg.goals.net},0.5)`; c.lineWidth=1;
+      // fundo da rede
+      c.beginPath(); c.moveTo(g.bt1.x,g.bt1.y); c.lineTo(g.bt2.x,g.bt2.y); c.lineTo(g.bb2.x,g.bb2.y); c.lineTo(g.bb1.x,g.bb1.y); c.closePath();
+      c.fillStyle='rgba(255,255,255,0.05)'; c.fill();
+      const N=9; for(let i=0;i<=N;i++){ const t=i/N;
+        const a={x:lerp(g.bt1.x,g.bt2.x,t),y:lerp(g.bt1.y,g.bt2.y,t)}, b={x:lerp(g.bb1.x,g.bb2.x,t),y:lerp(g.bb1.y,g.bb2.y,t)};
+        c.beginPath(); c.moveTo(a.x,a.y); c.lineTo(b.x,b.y); c.stroke(); }
+      for(let i=0;i<=4;i++){ const t=i/4;
+        const a={x:lerp(g.bt1.x,g.bb1.x,t),y:lerp(g.bt1.y,g.bb1.y,t)}, b={x:lerp(g.bt2.x,g.bb2.x,t),y:lerp(g.bt2.y,g.bb2.y,t)};
+        c.beginPath(); c.moveTo(a.x,a.y); c.lineTo(b.x,b.y); c.stroke(); }
+      // teto da rede (frente->trás)
+      for(let i=0;i<=4;i++){ const t=i/4;
+        const a={x:lerp(g.ft1.x,g.ft2.x,t),y:lerp(g.ft1.y,g.ft2.y,t)}, b={x:lerp(g.bt1.x,g.bt2.x,t),y:lerp(g.bt1.y,g.bt2.y,t)};
+        c.beginPath(); c.moveTo(a.x,a.y); c.lineTo(b.x,b.y); c.stroke(); }
+      c.restore();
+    },
+    DynamicShadows(S,c){
+      const k=S.cfg.shadows, W=S.W, H=S.H;
+      c.save(); S.pitchPath(c,-0.02); c.lineWidth=H*0.03; c.strokeStyle=`rgba(0,0,0,${k.rim})`; c.filter='blur(7px)'; c.stroke(); c.filter='none'; c.restore();
+      const vg=c.createRadialGradient(W/2,H*0.5,H*0.32,W/2,H*0.52,W*0.72);
+      vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,`rgba(0,0,0,${k.vignette})`); c.fillStyle=vg; c.fillRect(0,0,W,H);
+      const bg=c.createLinearGradient(0,H*0.82,0,H); bg.addColorStop(0,'rgba(0,0,0,0)'); bg.addColorStop(1,'rgba(0,0,0,0.4)'); c.fillStyle=bg; c.fillRect(0,H*0.82,W,H*0.18);
+    },
+  },
+
+  // painel publicitário (objeto independente) — faixa horizontal com texto
+  _board(c, x0, x1, y, h, k, near){
+    const w=x1-x0;
+    const g=c.createLinearGradient(0,y,0,y+h); g.addColorStop(0,k.bg); g.addColorStop(1,k.bg2);
+    c.fillStyle=g; c.fillRect(x0,y,w,h);
+    c.strokeStyle=k.edge; c.lineWidth=2; c.strokeRect(x0,y,w,h);
+    c.save(); c.beginPath(); c.rect(x0,y,w,h); c.clip();
+    c.font=`bold ${Math.round(h*0.6)}px "Courier New", monospace`; c.textBaseline='middle';
+    const seg=w/(near?7:6);
+    for(let i=0;i*seg<w;i++){ c.fillStyle=i%2?k.y1:k.w; c.fillText(k.msgs[i%2], x0+i*seg+seg*0.05, y+h*0.55); }
+    c.restore();
+  },
+
+  // blit da parte estática (dentro da transform da câmera)
+  draw(ctx, dx,dy,dw,dh){
+    if(!this.built) this.build();
+    const sm=ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(this.cv, dx,dy,dw,dh);
+    ctx.imageSmoothingEnabled=sm;
+  },
+
+  // ---- CAMADA CLIMÁTICA (dinâmica, por frame, em coordenadas de tela) ----
+  weather(ctx){
+    const w=this.cfg.weather; if(!w || w.type==='none') return;
+    const now=performance.now(), dt=Math.min(0.05,(now-(this._w.t||now))/1000); this._w.t=now;
+    if(w.type==='fog'){ ctx.fillStyle=`rgba(200,210,225,${0.10+0.25*w.intensity})`; ctx.fillRect(0,0,CW,CH); return; }
+    const N=Math.round((w.intensity||0.5)*(w.type==='snow'?160:200)), P=this._w.parts;
+    while(P.length<N) P.push({x:Math.random()*CW,y:Math.random()*CH,s:0.5+Math.random()});
+    while(P.length>N) P.pop();
+    ctx.save();
+    if(w.type==='rain'){ ctx.strokeStyle='rgba(180,200,230,0.45)'; ctx.lineWidth=1.4;
+      for(const p of P){ p.y+=dt*900*p.s; p.x+=dt*180; if(p.y>CH){p.y=-10;p.x=Math.random()*CW;}
+        ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(p.x-6,p.y-16); ctx.stroke(); } }
+    else { ctx.fillStyle='rgba(240,246,255,0.9)';
+      for(const p of P){ p.y+=dt*70*p.s; p.x+=Math.sin(now*0.001+p.y*0.05)*0.4; if(p.y>CH){p.y=-6;p.x=Math.random()*CW;}
+        ctx.beginPath(); ctx.arc(p.x,p.y,1.6*p.s,0,7); ctx.fill(); } }
+    ctx.restore();
+  },
+};
+
+// ---------- Estado ----------
+// mode: 'quick' = Partida rápida (60s, contagem regressiva). 'full' = Jogar
+// (partida completa: 1º e 2º tempo de 45 min cada, cronômetro crescente).
+const state = { scene:'title', score:0, time:60, running:false, mode:'quick', half:1, clock:0 };
+const HALF_SECONDS = 45*60;   // duração de cada tempo (45 min). Fácil de ajustar.
+// formata segundos como MM:SS para o cronômetro
+function fmtClock(sec){ const m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0, kicking:false, kickT:0, jumping:false, jumpT:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq / kicking: chute parado / jumping: animacao de pulo
+const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
+const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
+const GOAL_NET = 0.06;                    // profundidade da trave (atrás da linha de fundo)
+let goalScored = false;                   // evita contar o mesmo gol várias vezes
+// Estado do chute parado: direcao do lancamento, se a bola sera chutada e se ja foi lancada.
+let kickDir = { x:0, y:-1 };
+let kickBall = false;
+let kickFired = false;
+
+// EVENTOS DE ANIMACAO do chute (padrao "Animation Event"): cada evento dispara
+// UMA unica vez quando a reproducao (player.kickT, em frames) cruza o `frame`
+// indicado. O contato e um evento no FRAME EXATO em que o pe encosta na bola —
+// so entao a bola ganha velocidade e sai rolando, garantindo impacto perfeito.
+function onKickContact(){
+  if(kickBall){ ball.vu = kickDir.x*1.35; ball.vv = kickDir.y*1.35; }
+  kickFired = true;
+}
+const KICK_EVENTS = [
+  { frame: KICK_CONTACT, done:false, action: onKickContact },
+];
+
+// Câmera: 'near' liga o modo Perto; 'prog' (0..1) é a transição suave entre
+// Longe (estádio inteiro) e Perto (segue o personagem, centralizado).
+// No Perto o zoom é DINÂMICO: ajusta conforme a profundidade para o personagem
+// ficar sempre do mesmo tamanho e sempre no centro da tela, onde quer que vá.
+const CHAR_ON_SCREEN = 0.50;   // altura alvo do personagem na tela (fração) no Perto
+// userZoom: fator de zoom livre controlado pelo usuário (pinça com 2 dedos),
+// multiplica o zoom da câmera focada no personagem. 1 = padrão.
+const cam = { prog:0, near:false, userZoom:1 };
+const USER_ZOOM_MIN = 0.6, USER_ZOOM_MAX = 3.0;
+
+// Botão Voltar:
+//  • dentro do jogo / fim / tabela  → volta para a TELA INICIAL (Jogar bola / Ver tabela);
+//  • já na tela inicial              → sai para a Home do Alps OS (salva antes de navegar).
+function goToTitle(){
+  state.running=false; clearInterval(timerId);
+  hud.classList.remove('on'); pad.classList.remove('on');
+  state.scene='title'; show('title');
+  saveNow();   // best-effort
+}
+document.getElementById('backBtn').onclick=()=>{
+  if(state.scene==='title'){
+    const go=()=>{ window.location.href='/home'; };
+    Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+  } else {
+    goToTitle();
+  }
+};
+
+// =========================================================================
+//  TELAS
+// =========================================================================
+const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
+const hud=document.getElementById('hud'), pad=document.getElementById('pad');
+function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
+document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
+document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
+document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
+// Tela de TABELA (placeholder por enquanto)
+document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
+
+// Entra em tela cheia SOMENTE quando o celular está DEITADO (paisagem) E o
+// usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
+// O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
+document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
+
+// Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
+function goFullscreen(){
+  if(isPortrait()) return;
+  const el=document.documentElement;
+  const req=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+  try { const r=req&&req.call(el); if(r&&r.catch) r.catch(()=>{}); } catch(_){}
+  try { if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); } catch(_){}
+}
+function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+document.addEventListener('fullscreenchange', resize);
+document.addEventListener('webkitfullscreenchange', resize);
+
+function startMatch(mode){
+  state.mode = (mode==='full') ? 'full' : 'quick';
+  goFullscreen();
+  show(null); state.scene='game'; state.score=0; state.running=true;
+  hud.classList.add('on'); pad.classList.add('on');
+  document.getElementById('score').textContent='0';
+  const halfEl=document.getElementById('half');
+  if(state.mode==='full'){
+    // Partida completa: 1º tempo, cronômetro em 00:00 subindo até 45:00.
+    state.half=1; state.clock=0;
+    halfEl.style.display=''; halfEl.textContent='1º TEMPO';
+    document.getElementById('time').textContent=fmtClock(0);
+  } else {
+    // Partida rápida: contagem regressiva de 60s (como antes).
+    state.time=60;
+    halfEl.style.display='none';
+    document.getElementById('time').textContent='60';
+  }
+  resetPositions(); startTimer();
+  scheduleSave();   // persiste a partida recém-iniciada
+}
+function resetPositions(){
+  player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false; player.z=0; player.vz=0;
+  player.kicking=false; player.kickT=0; kickFired=false; kickBall=false;
+  player.jumping=false; player.jumpT=0;
+  ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0;
+  goalScored=false;   // libera a contagem do próximo gol
+}
+let timerId=null;
+function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
+  if(!state.running || isPortrait()) return;
+  if(state.mode==='full'){
+    // cronômetro crescente; ao chegar a 45 min troca de tempo / encerra
+    state.clock++;
+    if(state.clock>=HALF_SECONDS){
+      if(state.half===1){
+        // FIM DO 1º TEMPO → recomeça no 2º tempo, zera o cronômetro
+        state.half=2; state.clock=0;
+        document.getElementById('half').textContent='2º TEMPO';
+        document.getElementById('time').textContent=fmtClock(0);
+        flashMsg('2º TEMPO'); resetPositions(); scheduleSave();
+      } else {
+        endMatch(); return;   // fim do 2º tempo → fim de jogo
+      }
+    } else {
+      document.getElementById('time').textContent=fmtClock(state.clock);
+    }
+  } else {
+    state.time--; document.getElementById('time').textContent=state.time;
+    if(state.time<=0) endMatch();
+  }
+},1000); }
+function endMatch(){ state.running=false; clearInterval(timerId);
+  hud.classList.remove('on'); pad.classList.remove('on');
+  document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
+  show('end'); state.scene='end';
+  recordHistory(state.score);   // registra a partida no histórico
+  saveNow();                    // salva o estado 'end' (placar final) p/ retomar na tela de fim
+  loadBest();                   // atualiza o recorde mostrado no título
+}
+
+// =========================================================================
+//  INPUT — joystick (esquerda) + chute (direita) + teclado
+// =========================================================================
+const keys={};
+addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true;
+  if(e.key===' '){e.preventDefault(); kick();}
+  if(e.key.toLowerCase()==='k'){ jump(); } });
+addEventListener('keyup',e=> keys[e.key.toLowerCase()]=false);
+
+const stick=document.getElementById('stick'), knob=document.getElementById('knob'),
+      kickBtn=document.getElementById('kick'), jumpBtn=document.getElementById('jump');
+let stickVec={x:0,y:0}, stickPid=null, center={x:0,y:0};
+const MAXR=34;
+function setKnob(dx,dy){ knob.style.left=(30+dx)+'px'; knob.style.top=(30+dy)+'px'; }
+stick.addEventListener('pointerdown',e=>{
+  stickPid=e.pointerId; stick.setPointerCapture(e.pointerId);
+  const r=stick.getBoundingClientRect(); center={x:r.left+r.width/2,y:r.top+r.height/2}; movePointer(e);
+});
+stick.addEventListener('pointermove',e=>{ if(e.pointerId===stickPid) movePointer(e); });
+function endStick(e){ if(e.pointerId===stickPid){ stickPid=null; stickVec={x:0,y:0}; setKnob(0,0); } }
+stick.addEventListener('pointerup',endStick);
+stick.addEventListener('pointercancel',endStick);
+function movePointer(e){
+  let dx=e.clientX-center.x, dy=e.clientY-center.y; const d=Math.hypot(dx,dy);
+  if(d>MAXR){ dx=dx/d*MAXR; dy=dy/d*MAXR; } setKnob(dx,dy);
+  stickVec={x:dx/MAXR, y:dy/MAXR};
+}
+kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kick(); });
+jumpBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); jump(); });
+
+// Botão único de câmera: alterna entre Longe e Perto.
+// Longe → texto "Perto" (vai aproximar); Perto → texto "Longe" (vai afastar).
+const camToggleBtn=document.getElementById('camToggle');
+function updateCamBtn(){ camToggleBtn.textContent = cam.near ? '🔭 Longe' : '🔍 Perto'; }
+camToggleBtn.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  cam.near=!cam.near;
+  updateCamBtn();
+});
+updateCamBtn();
+
+// PINÇA (2 dedos) para aproximar/afastar a câmera livremente, focada no
+// personagem. Funciona junto com o botão Longe/Perto (multiplica o zoom).
+// Os toques chegam ao canvas pelas áreas vazias (o joystick e os botões capturam
+// os seus próprios toques), então o pinça não conflita com os controles.
+const pinchPts = new Map();
+let pinchDist0 = 0, pinchZoom0 = 1;
+function pinchBase(){
+  if(pinchPts.size === 2){
+    const [a,b] = [...pinchPts.values()];
+    pinchDist0 = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    pinchZoom0 = cam.userZoom;
+  }
+}
+cv.addEventListener('pointerdown', e=>{
+  pinchPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  pinchBase();
+});
+cv.addEventListener('pointermove', e=>{
+  if(!pinchPts.has(e.pointerId)) return;
+  pinchPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if(pinchPts.size === 2){
+    const [a,b] = [...pinchPts.values()];
+    const d = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    cam.userZoom = Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, pinchZoom0 * d/pinchDist0));
+  }
+});
+function pinchEnd(e){ pinchPts.delete(e.pointerId); pinchBase(); }
+cv.addEventListener('pointerup', pinchEnd);
+cv.addEventListener('pointercancel', pinchEnd);
+
+// =========================================================================
+//  LÓGICA
+// =========================================================================
+function moveVec(){
+  let mx=0,my=0;
+  if(keys['a']||keys['arrowleft'])mx-=1; if(keys['d']||keys['arrowright'])mx+=1;
+  if(keys['w']||keys['arrowup'])my-=1;   if(keys['s']||keys['arrowdown'])my+=1;
+  mx+=stickVec.x; my+=stickVec.y;
+  const l=Math.hypot(mx,my); if(l>1){mx/=l;my/=l;}
+  return {x:mx,y:my,l:Math.min(1,l)};
+}
+const JUMP_V=340, GRAV=980;     // velocidade inicial e gravidade do pulo (px/s)
+function jump(){
+  if(state.scene!=='game'||!state.running) return;
+  if(player.kicking || player.jumping) return;   // não interrompe chute/pulo em andamento
+  player.jumping=true; player.jumpT=0;            // toca a animação de pulo
+}
+function kick(){
+  if(state.scene!=='game'||!state.running) return;
+  if(player.kicking) return;                         // já está no meio de um chute
+  const m=moveVec();
+  let ax=m.x, ay=m.y;
+  if(Math.hypot(ax,ay)<0.2){ ax=0; ay=-1; }          // sem direção: chuta pro gol (fundo)
+  else { const n=Math.hypot(ax,ay); ax/=n; ay/=n; }
+
+  // PARADO: toca a animação de chute parado e gruda a bola no ponto do pé.
+  if(!player.moving){
+    player.kicking=true; player.kickT=0; kickFired=false;
+    for(const ev of KICK_EVENTS) ev.done=false;   // re-arma os eventos de animação
+    kickDir={ x:ax, y:ay };
+    if(ax>0.05) player.face=1; else if(ax<-0.05) player.face=-1;
+    // Se a bola está por perto, posiciona-a exatamente onde o pé encosta no contato
+    // (à frente do jogador, no chão). Ela espera ali até o quadro de contato.
+    const du=ball.u-player.u, dv=ball.v-player.v;
+    kickBall = (Math.hypot(du, dv*1.4) < 0.20);
+    if(kickBall){
+      const w = depthScale(player.v)*(KICK_SH.FW/KICK_SH.FH);
+      const fieldW = Math.abs(uvToScreen(1,player.v).x - uvToScreen(0,player.v).x) || 1;
+      ball.u = player.u + player.face*KICK_FOOT_DX*w/fieldW;
+      ball.v = player.v;
+      ball.vu = 0; ball.vv = 0;
+    }
+    return;
+  }
+
+  // EM MOVIMENTO: chute instantâneo atual (a folha de chute andando/correndo virá depois).
+  const du=ball.u-player.u, dv=ball.v-player.v;
+  if(Math.hypot(du,dv*1.4) < 0.085){
+    ball.vu = ax*1.35; ball.vv = ay*1.35;
+  }
+}
+
+function update(dt){
+  if(state.scene!=='game' || isPortrait()) return;
+
+  // ANIMAÇÃO DE CHUTE PARADO: roda a folha de chute; no quadro de contato a bola
+  // (se estiver por perto) é lançada e sai rolando pelo campo. Movimento fica travado.
+  if(player.kicking){
+    player.moving=false; player.running=false;
+    const prevT=player.kickT;
+    player.kickT += dt*KICK_FPS;
+    // dispara os EVENTOS DE ANIMACAO cruzados neste passo (ex.: contato com a bola)
+    for(const ev of KICK_EVENTS){
+      if(!ev.done && prevT < ev.frame && player.kickT >= ev.frame){ ev.done=true; ev.action(); }
+    }
+    // antes do contato, a bola fica parada grudada no ponto do pé
+    if(kickBall && !kickFired){ ball.vu=0; ball.vv=0; }
+    // gravidade (caso esteja no ar) e fim da animação
+    player.vz -= GRAV*dt; player.z += player.vz*dt; if(player.z<0){ player.z=0; player.vz=0; }
+    if(player.kickT >= KICK_SH.frames){ player.kicking=false; }
+    ballPhysics(dt);
+    return;
+  }
+
+  // ANIMAÇÃO DE PULO: toca a folha de pulo; a altura (z) é gerada por código e
+  // sincronizada com a animação — sobe na decolagem e zera na aterrissagem.
+  if(player.jumping){
+    player.moving=false; player.running=false;
+    player.jumpT += dt*JUMP_FPS;
+    const f=player.jumpT;
+    if(f>=JUMP_TO && f<=JUMP_LD){
+      const ph=(f-JUMP_TO)/(JUMP_LD-JUMP_TO);            // 0..1 do tempo no ar
+      player.z = depthScale(player.v)*JUMP_Z * Math.sin(Math.PI*ph);
+    } else {
+      player.z = 0;                                       // agachado/recuperando: no chão
+    }
+    if(player.jumpT >= JUMP_SH.frames){ player.jumping=false; player.z=0; }
+    ballPhysics(dt);
+    return;
+  }
+
+  const m=moveVec();
+  player.moving = m.l>0.12;
+  if(player.moving){
+    // direção normalizada + intensidade (0..1) do quanto o joystick foi empurrado
+    const dirx=m.x/(m.l||1), diry=m.y/(m.l||1);
+    // Joystick perto da borda (intensidade alta) → CORRE; pouco empurrão → ANDA.
+    // Histerese: entra em corrida em 0.88 e só sai abaixo de 0.66, p/ NÃO ficar
+    // piscando a troca de sprite (andar↔correr) quando o joystick fica no limiar.
+    const RUN_THR=0.82, WALK=0.14, RUN=0.28;
+    if (m.l>=0.88) player.running=true; else if (m.l<=0.66) player.running=false;
+    const speed = m.l<RUN_THR
+      ? WALK*(m.l/RUN_THR)                                  // anda: devagar→normal
+      : WALK + (RUN-WALK)*((m.l-RUN_THR)/(1-RUN_THR));      // corre: acelera no talo
+    // deslocamento real neste frame (no espaço do campo)
+    const du = dirx*speed*dt, dv = diry*speed*0.95*dt;
+    player.u += du;
+    player.v += dv;
+    if(dirx> 0.05) player.face= 1; else if(dirx<-0.05) player.face=-1;
+    // Cadência da animação por TEMPO (não por distância): garante pernas/braços/tronco
+    // sempre fluidos, sem "travar" em passos lentos. Levemente proporcional ao empurrão
+    // do joystick p/ manter a velocidade natural de caminhada de um jogador. O loop é
+    // infinito (módulo nº de quadros), passando por TODOS os quadros em sequência.
+    const animFps = player.running ? (9 + 5*m.l) : (9 + 5*(m.l/RUN_THR));
+    player.anim += dt * animFps;
+  } else {
+    player.running = false;
+  }
+  // Limites do campo: o jogador alcança as LINHAS BRANCAS (0..1). Dentro da boca
+  // do gol, pode entrar na trave (v abaixo de 0, até -GOAL_NET).
+  player.u = Math.max(0, Math.min(1, player.u));
+  const pInGoal = player.u > GOAL.uMin && player.u < GOAL.uMax;
+  player.v = Math.max(pInGoal ? -GOAL_NET : 0, Math.min(1, player.v));
+
+  // pulo: altura (z) em px na tela, com gravidade
+  player.vz -= GRAV*dt;
+  player.z  += player.vz*dt;
+  if(player.z<0){ player.z=0; player.vz=0; }
+
+  // DRIBLE por CONTATO REAL do pé com a bola.
+  // Modela a passada a partir da folha em uso (WALK_SH ao andar, RUN_SH ao correr):
+  // o pé da frente avança (reach) na direção em que o jogador olha e SOBE/DESCE
+  // (footLift) conforme o quadro. Como o pé erguido fica fisicamente mais alto que
+  // a bola (no chão), só há contato — e portanto arrasto — quando um pé BAIXO e
+  // ADIANTADO encosta nela. Nada de empurrar a bola de longe.
+  if(state.running && player.moving && player.z<6 && Math.hypot(ball.vu,ball.vv)<0.9){
+    const sheet = player.running ? RUN_SH : WALK_SH;          // folha de corrida/caminhada
+    const pf = uvToScreen(player.u, player.v);                // base = pés do jogador
+    const charH = depthScale(player.v);
+    const charW = charH * (sheet.FW / sheet.FH);
+    // fase do passo: 2 passadas (um pé de cada vez) por ciclo completo da folha
+    const phase = (player.anim / sheet.frames) * 4 * Math.PI;
+    const swing = Math.max(0, Math.sin(phase));              // avanço do pé da frente (0..1)
+    // pé da frente: parte da base e estica na passada, na direção em que o jogador olha
+    const footX = pf.x + player.face * (0.08 + (player.running ? 0.26 : 0.18) * swing) * charW;
+    // o pé SOBE conforme avança e DESCE ao plantar: quando está no ar (alto) não
+    // alcança a bola (que está no chão), então só há contato com o pé baixo.
+    const footLift = (player.running ? 0.14 : 0.10) * charH * swing;
+    const footY = pf.y - footLift;
+    const footR = charW * 0.30;                              // raio de contato dos pés
+    // bola na tela (mesma projeção/zoom do jogador)
+    const pb = uvToScreen(ball.u, ball.v);
+    const ballR = Math.max(3, depthScale(ball.v) * 0.085);
+    const dxp = pb.x - footX, dyp = (pb.y - ballR) - footY;
+    if(Math.hypot(dxp, dyp) < footR + ballR){
+      ball.vu = m.x * 0.85; ball.vv = m.y * 0.80;            // arrasta na direção do movimento
+    }
+  }
+
+  ballPhysics(dt);
+}
+
+// Física da bola (integração + atrito + paredes + linha de fundo/gol). Numa função
+// própria para rodar tanto no fluxo normal quanto durante a animação de chute.
+function ballPhysics(dt){
+  ball.u+=ball.vu*dt; ball.v+=ball.vv*dt;
+  const fr=Math.pow(0.20,dt); ball.vu*=fr; ball.vv*=fr;
+  if(Math.abs(ball.vu)<0.01) ball.vu=0; if(Math.abs(ball.vv)<0.01) ball.vv=0;
+  // paredes laterais (linhas brancas)
+  if(ball.u<0){ball.u=0; ball.vu*=-0.7;} if(ball.u>1){ball.u=1; ball.vu*=-0.7;}
+  // linha de frente (perto)
+  if(ball.v>1){ball.v=1; ball.vv*=-0.7;}
+  // linha de fundo: dentro da boca a bola ENTRA na trave (e é GOL); fora, bate na linha
+  if(ball.v<0){
+    if(ball.u>GOAL.uMin && ball.u<GOAL.uMax){
+      if(ball.v<-GOAL_NET){ ball.v=-GOAL_NET; ball.vv*=-0.5; }       // fundo da rede
+      if(!goalScored && ball.v<-0.015){ goalScored=true; scoreGoal(); } // entrou na trave → gol
+    } else { ball.v=0; ball.vv*=-0.7; }                              // bate na linha de fundo
+  }
+}
+
+let goalFlash=0;
+function scoreGoal(){
+  state.score++; document.getElementById('score').textContent=state.score;
+  flashMsg('GOOOOL!'); goalFlash=1; state.running=false;
+  scheduleSave();   // persiste o novo placar
+  setTimeout(()=>{ if(state.scene==='game'){ resetPositions(); state.running=true; } },1000);
+}
+const msgEl=document.getElementById('msg');
+function flashMsg(t){ msgEl.textContent=t; msgEl.style.opacity=1; setTimeout(()=>msgEl.style.opacity=0,1000); }
+
+// =========================================================================
+//  RENDER
+// =========================================================================
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  layoutStadium();
+  // transição suave Longe <-> Perto
+  cam.prog += ((cam.near?1:0) - cam.prog) * 0.15;
+  const t = cam.prog;
+
+  // fundo (fora da imagem do estádio)
+  ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
+
+  const inGame = (state.scene==='game' || state.scene==='end');
+  // Câmera-perseguição: no Perto centraliza o personagem e o mantém sempre do
+  // mesmo tamanho (zoom dinâmico). No Longe (t=0) volta ao enquadramento normal.
+  ctx.save();
+  if(inGame){
+    const p = uvToScreen(player.u, player.v);     // pés do personagem (base)
+    const charH = depthScale(player.v);           // altura do sprite (base, zoom 1)
+    // zoom p/ o personagem ocupar CHAR_ON_SCREEN da altura da tela
+    const zNear = Math.max(1, Math.min(8, (CH*CHAR_ON_SCREEN)/charH));
+    // zoom da transição Longe↔Perto, multiplicado pelo zoom livre do usuário (pinça)
+    const zoom  = lerp(1, zNear, t) * cam.userZoom;
+    // ponto do MUNDO que vai p/ o centro: pés (Longe) → meio do corpo (Perto)
+    const wx = p.x, wy = p.y - charH*0.5*t;
+    // onde ele aparece na TELA: posição real (Longe) → centro da tela (Perto)
+    const sx = lerp(p.x, CW/2, t), sy = lerp(p.y, CH*0.5, t);
+    ctx.translate(sx, sy);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-wx, -wy);
+  }
+
+  // estádio PROCEDURAL MODULAR (camadas estáticas blitadas do offscreen)
+  Stadium.draw(ctx, img.dx, img.dy, img.dw, img.dh);
+
+  if(inGame){
+    // ordena por profundidade (v) p/ sobreposição correta
+    const ents=[
+      {v:ball.v,    d:drawBall},
+      {v:player.v,  d:drawPlayer},
+    ].sort((a,b)=>a.v-b.v);
+    ents.forEach(e=>e.d());
+  }
+
+  ctx.restore();
+
+  // vinheta suave: dá profundidade e aspecto "cinematográfico" em alta resolução
+  const vg=ctx.createRadialGradient(CW/2, CH*0.55, CH*0.25, CW/2, CH*0.55, CH*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.42)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,CH);
+
+  if(goalFlash>0){ goalFlash-=0.03;
+    ctx.fillStyle=`rgba(252,211,77,${Math.max(0,goalFlash)*0.30})`; ctx.fillRect(0,0,CW,CH); }
+
+  // CAMADA CLIMÁTICA (chuva/neve/névoa) — dinâmica, por cima de tudo
+  if(state.scene==='game' || state.scene==='end') Stadium.weather(ctx);
+}
+
+function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,0,0.30)';
+  ctx.beginPath(); ctx.ellipse(x,y,w,w*0.35,0,0,Math.PI*2); ctx.fill(); }
+
+function drawPlayer(){
+  const p=uvToScreen(player.u,player.v);
+  // Chutando parado usa a folha de CHUTE; andando a de CAMINHADA; correndo a de CORRIDA.
+  const jumping = player.jumping;
+  const kicking = player.kicking && !jumping;
+  const run = !kicking && !jumping && player.running && player.moving;
+  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
+  const sprite = jumping ? A.jump : kicking ? A.kick : (run ? A.runner : A.walk);
+  const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
+  // sombra fica menor quanto mais alto está o pulo
+  const sj=1/(1+player.z/Math.max(20,h*0.6));
+  shadow(p.x, p.y, w*0.42*sj);
+  // quadro de animação
+  // O 1º quadro da folha de caminhada é a pose PARADO: usado só quando o
+  // jogador não anda. Andando, pulamos esse quadro (0) e também o penúltimo
+  // (41), que é idêntico ao último (42), e ciclamos pelos demais.
+  let f;
+  if(jumping){
+    f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.jumpT)));
+  } else if(kicking){
+    f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.kickT)));
+  } else if(!player.moving){
+    f = 0;
+  } else if(sheet === WALK_SH){
+    const last = sheet.frames - 1;            // 42 (último quadro)
+    const n = sheet.frames - 2;               // 41 quadros úteis (sem o 0 e o 41)
+    const idx = Math.floor(player.anim) % n;  // 0..40
+    f = idx < n - 1 ? idx + 1 : last;         // 1..40 e depois 42 (pula o 41)
+  } else {
+    f = Math.floor(player.anim) % sheet.frames;
+  }
+  const col=f%sheet.cols, row=Math.floor(f/sheet.cols);
+  ctx.imageSmoothingEnabled=true;        // filtragem suave (alta qualidade, sem serrilhado)
+  ctx.imageSmoothingQuality='high';
+  ctx.save();
+  ctx.translate(p.x, p.y - player.z);         // levanta o sprite na altura do pulo
+  if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
+  ctx.drawImage(sprite, col*sheet.FW,row*sheet.FH,sheet.FW,sheet.FH, -w/2,-h, w,h);
+  ctx.restore();
+}
+
+let spin=0;
+function drawBall(){
+  const p=uvToScreen(ball.u,ball.v);
+  const r=Math.max(3, depthScale(ball.v)*0.085);
+  spin+=(Math.abs(ball.vu)+Math.abs(ball.vv))*0.3;
+  shadow(p.x,p.y, r*1.1);
+  ctx.imageSmoothingEnabled=true;
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p.x,p.y-r,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=Math.max(1,r*0.18); ctx.stroke();
+  ctx.fillStyle='#1f2937';
+  ctx.beginPath(); ctx.arc(p.x+Math.cos(spin)*r*0.4, p.y-r+Math.sin(spin)*r*0.4, r*0.32,0,Math.PI*2); ctx.fill();
+}
+
+// =========================================================================
+//  PERSISTÊNCIA (Supabase) — salva o jogo do usuário e retoma de onde parou
+// =========================================================================
+// Mesma origem do app React → o supabase-js restaura sozinho a sessão guardada
+// no localStorage. Sem login/sem config, o jogo segue funcionando sem salvar.
+let sb=null, gameUser=null, saveQueued=false;
+
+function snapshot(){
+  return {
+    scene: state.scene, score: state.score, time: state.time,
+    mode: state.mode, half: state.half, clock: state.clock,
+    player: { u:player.u, v:player.v, face:player.face, anim:player.anim, running:player.running },
+    ball:   { u:ball.u, v:ball.v, vu:ball.vu, vv:ball.vv },
+    cam:    { near: cam.near, userZoom: cam.userZoom },
+    savedAt: Date.now(),
+  };
+}
+
+function scheduleSave(){
+  if(!sb || !gameUser || saveQueued) return;
+  saveQueued=true;
+  setTimeout(()=>{ saveQueued=false; saveNow(); }, 800);   // debounce
+}
+
+async function saveNow(){
+  if(!sb || !gameUser) return;
+  try{
+    await sb.from('fkw_game_state').upsert({
+      user_id: gameUser.id, state: snapshot(), updated_at: new Date().toISOString(),
+    });
+  }catch(_){}
+}
+
+async function recordHistory(score){
+  if(!sb || !gameUser) return;
+  try{
+    await sb.from('fkw_match_history').insert({ user_id: gameUser.id, score: score, duration: 60 });
+  }catch(_){}
+}
+
+async function loadBest(){
+  if(!sb || !gameUser) return;
+  try{
+    const { data } = await sb.from('fkw_match_history')
+      .select('score').eq('user_id', gameUser.id).order('score',{ ascending:false }).limit(1);
+    const best = (data && data[0]) ? data[0].score : 0;
+    const el = document.getElementById('recorde');
+    if(el) el.textContent = best>0 ? `🏆 Seu recorde: ${best} gol${best===1?'':'s'}` : '';
+  }catch(_){}
+}
+
+function applySnapshot(s){
+  if(!s || state.scene!=='title') return;   // não sobrescreve se o usuário já começou
+  if(s.player) Object.assign(player, s.player);
+  if(s.ball)   Object.assign(ball, s.ball);
+  if(s.cam){
+    cam.near=!!s.cam.near;
+    if(typeof s.cam.userZoom==='number') cam.userZoom=Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, s.cam.userZoom));
+    updateCamBtn();
+  }
+  if(s.scene==='game'){
+    state.scene='game'; state.score=s.score||0; state.running=true;
+    state.mode = (s.mode==='full') ? 'full' : 'quick';
+    document.getElementById('score').textContent=state.score;
+    const halfEl=document.getElementById('half');
+    if(state.mode==='full'){
+      state.half=s.half||1; state.clock=s.clock||0;
+      halfEl.style.display=''; halfEl.textContent=(state.half===2?'2º TEMPO':'1º TEMPO');
+      document.getElementById('time').textContent=fmtClock(state.clock);
+    } else {
+      state.time=(typeof s.time==='number'?s.time:60);
+      halfEl.style.display='none';
+      document.getElementById('time').textContent=state.time;
+    }
+    show(null); hud.classList.add('on'); pad.classList.add('on');
+    startTimer();
+  } else if(s.scene==='end'){
+    state.scene='end'; state.score=s.score||0;
+    document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
+    show('end');
+  }
+}
+
+async function initPersistence(){
+  try{
+    const C = window.__ALPS_SB__;
+    if(!C || !C.url || !C.anonKey || !window.supabase) return;
+    sb = window.supabase.createClient(C.url, C.anonKey);
+    const { data } = await sb.auth.getUser();
+    gameUser = (data && data.user) ? data.user : null;
+    if(!gameUser) return;                 // deslogado: joga sem salvar
+    await loadBest();
+    // Ao entrar, abre SEMPRE na tela inicial ("Jogar bola"). Os dados continuam
+    // sendo salvos no Supabase; o retomar-de-onde-parou fica para depois.
+  }catch(_){ /* offline/sem sessão: segue sem persistência */ }
+}
+
+// Autosave periódico durante a partida + salvar ao ocultar/sair a aba.
+setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 5000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveNow(); });
+window.addEventListener('pagehide', ()=>{ saveNow(); });
+
+initPersistence();
+
+// =========================================================================
+//  LOOP
+// =========================================================================
+let last=performance.now();
+function loop(now){
+  let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+  if(A.loaded>=A.need){ update(dt); render(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
