@@ -12,8 +12,14 @@ autônoma: abra o `index.html` em qualquer servidor HTTP (mesma origem) e jogue.
   funcionam como se fossem um só. **A ordem importa** (cada um usa o que os
   anteriores definiram):
   - `core.js` — canvas, contexto 2D, redimensionamento (retina) e orientação.
-  - `assets.js` — carregamento das imagens (sprites, grama, gols) e âncoras.
-  - `sprites.js` — folhas de sprite do personagem (andar, correr, chutar, pular).
+  - `assets/` — **um arquivo por imagem, com o MESMO nome do arquivo em `assets/`**
+    (ex.: `assets/goal-left.png` ↔ `js/assets/goal-left.js`). Cada um carrega a sua
+    imagem e diz onde ela fica e o tamanho dos quadros. O desenho em si continua em
+    `stadium.js`/`render.js`.
+    - `_loader.js` — infra compartilhada (contador de carga, âncoras dos gols).
+    - `player_walk.js`, `player_run.js`, `player_kick.js`, `player_jump.js` — sprites.
+    - `pitch-grass.js` — o gramado. `goal-left.js`, `goal-right.js` — as traves.
+    - (a arte `fkw-title.jpg` é uma `<img>` direta no `index.html`.)
   - `field.js` — geometria do campo em perspectiva, escala por profundidade.
   - `stadium.js` — estádio procedural (céu, arquibancada, público, grama, luzes).
   - `state.js` — estado da partida, jogador, bola, gol e chute.
