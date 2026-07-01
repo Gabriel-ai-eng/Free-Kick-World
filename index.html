@@ -89,6 +89,22 @@
     backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
   #backBtn:active { transform:scale(.93); }
 
+  /* ---------- Login (entrar com a conta do Alps p/ salvar) ---------- */
+  #scrLogin { gap:14px; }
+  .loginForm { display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; }
+  #scrLogin input { font-family:inherit; font-size:16px; padding:13px 14px; border-radius:10px;
+    border:2px solid rgba(148,163,184,.4); background:rgba(15,23,42,.7); color:#e2e8f0; outline:none;
+    user-select:text; -webkit-user-select:text; touch-action:auto; }
+  #scrLogin input:focus { border-color:#7dd3fc; }
+  .loginErr { color:#fca5a5; font-size:13px; min-height:16px; line-height:1.35; }
+  #loginBtn:disabled { opacity:.6; }
+  #authStatus { position:fixed; top:10px; right:10px; z-index:60; font-family:inherit; cursor:pointer;
+    display:flex; align-items:center; gap:4px; padding:5px 11px; font-size:12px; letter-spacing:.3px;
+    color:#e2e8f0; background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4); border-radius:999px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
+  #authStatus:active { transform:scale(.93); }
+  #authStatus.hidden { display:none; }
+
   /* ---------- Overlay: gire o celular para a horizontal ---------- */
   #rotate { position:fixed; inset:0; z-index:50; display:none;
     flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
@@ -116,6 +132,9 @@
 
 <!-- Voltar para a Home -->
 <button id="backBtn">← Voltar</button>
+
+<!-- Conta logada (sair) -->
+<button id="authStatus" class="hidden"><span id="authEmail"></span> · Sair</button>
 
 <!-- Gire o celular -->
 <div id="rotate">
@@ -148,6 +167,22 @@
     <button class="hotspot" id="startGame" aria-label="Jogar"></button>
     <button class="hotspot" id="startQuick" aria-label="Iniciar partida rápida"></button>
   </div>
+</div>
+
+<!-- LOGIN (entrar com a conta do Alps para salvar o progresso) -->
+<div id="scrLogin" class="screen hidden">
+  <h1 style="color:#7dd3fc">FREE KICK WORLD</h1>
+  <p class="sub">Entre com sua conta do Alps para salvar seu progresso e recorde.</p>
+  <form id="loginForm" class="loginForm" autocomplete="on">
+    <input id="loginEmail" type="email" inputmode="email" autocomplete="username"
+           placeholder="seu@email.com" required />
+    <input id="loginPass" type="password" autocomplete="current-password"
+           placeholder="senha" required />
+    <div id="loginErr" class="loginErr"></div>
+    <button class="btn" id="loginBtn" type="submit">ENTRAR</button>
+  </form>
+  <button class="btn ghost" id="playGuest" type="button">Jogar sem salvar</button>
+  <small class="hint">Use o mesmo e-mail e senha do app Alps (alpsprime.com.br).</small>
 </div>
 
 <!-- FIM -->
@@ -658,9 +693,11 @@ document.getElementById('backBtn').onclick=()=>{
 // =========================================================================
 //  TELAS
 // =========================================================================
-const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
+const scr={title:document.getElementById('scrTitle'),login:document.getElementById('scrLogin'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
-function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
+function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
+  // Na tela de login não faz sentido o "Voltar" (não há app hospedeiro aqui).
+  const bb=document.getElementById('backBtn'); if(bb) bb.style.display=(n==='login')?'none':''; }
 document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
 document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
@@ -670,7 +707,7 @@ document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='
 // Entra em tela cheia SOMENTE quando o celular está DEITADO (paisagem) E o
 // usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
 // O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
-document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
+document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen() && scr.login.classList.contains('hidden')) goFullscreen(); });
 
 // Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
 function goFullscreen(){
@@ -1206,25 +1243,83 @@ function applySnapshot(s){
   }
 }
 
+// Cria o cliente supabase uma única vez (necessário já na tela de login).
+function ensureClient(){
+  if(sb) return sb;
+  const C = window.__ALPS_SB__;
+  if(!C || !C.url || !C.anonKey || !window.supabase) return null;
+  sb = window.supabase.createClient(C.url, C.anonKey);
+  return sb;
+}
+
+// Reflete o estado de login na UI (chip "Sair" no topo direito).
+function updateAuthUI(){
+  const chip=document.getElementById('authStatus'), em=document.getElementById('authEmail');
+  if(gameUser){ if(em) em.textContent=gameUser.email||'conta'; if(chip) chip.classList.remove('hidden'); }
+  else { if(chip) chip.classList.add('hidden'); }
+}
+
+// Traduz os erros mais comuns do Supabase Auth para PT-BR.
+function traduzErroAuth(err){
+  const m=(err && err.message ? err.message : '').toLowerCase();
+  if(m.includes('invalid login')) return 'E-mail ou senha incorretos.';
+  if(m.includes('email not confirmed')) return 'E-mail ainda não confirmado. Confirme pelo app Alps.';
+  if(m.includes('network')||m.includes('fetch')||m.includes('failed to fetch')) return 'Sem conexão. Tente de novo.';
+  return (err && err.message) ? err.message : 'Não foi possível entrar.';
+}
+
 async function initPersistence(){
   try{
-    const C = window.__ALPS_SB__;
-    if(!C || !C.url || !C.anonKey || !window.supabase) return;
-    sb = window.supabase.createClient(C.url, C.anonKey);
+    if(!ensureClient()){ show('title'); return; }     // sem config: joga sem salvar
     const { data } = await sb.auth.getUser();
     gameUser = (data && data.user) ? data.user : null;
-    if(!gameUser) return;                 // deslogado: joga sem salvar
-    await loadBest();
-    // Ao entrar, abre SEMPRE na tela inicial ("Jogar bola"). Os dados continuam
-    // sendo salvos no Supabase; o retomar-de-onde-parou fica para depois.
-  }catch(_){ /* offline/sem sessão: segue sem persistência */ }
+    if(gameUser){ updateAuthUI(); await loadBest(); show('title'); state.scene='title'; }
+    else { show('login'); }                            // sem sessão: pede login
+  }catch(_){ show('title'); }                          // offline: segue sem persistência
 }
+
+// ---- Login / logout na própria origem do jogo (mesmas contas do Alps) ----
+const loginForm=document.getElementById('loginForm');
+if(loginForm) loginForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email=(document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  const pass=document.getElementById('loginPass').value||'';
+  const errEl=document.getElementById('loginErr'), btn=document.getElementById('loginBtn');
+  errEl.textContent='';
+  if(!ensureClient()){ errEl.textContent='Configuração do Supabase ausente.'; return; }
+  if(!email || !pass){ errEl.textContent='Preencha e-mail e senha.'; return; }
+  btn.disabled=true; btn.textContent='ENTRANDO…';
+  try{
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error) throw error;
+    gameUser = (data && data.user) ? data.user : null;
+    updateAuthUI(); await loadBest();
+    document.getElementById('loginPass').value='';
+    show('title'); state.scene='title';
+  }catch(err){ errEl.textContent=traduzErroAuth(err); }
+  finally{ btn.disabled=false; btn.textContent='ENTRAR'; }
+});
+
+// Jogar como convidado (sem salvar).
+const guestBtn=document.getElementById('playGuest');
+if(guestBtn) guestBtn.onclick=()=>{ gameUser=null; updateAuthUI(); show('title'); state.scene='title'; };
+
+// Sair: salva o que der, encerra a sessão e volta para o login.
+const authStatusBtn=document.getElementById('authStatus');
+if(authStatusBtn) authStatusBtn.onclick=async ()=>{
+  try{ await saveNow(); }catch(_){}
+  try{ if(sb) await sb.auth.signOut(); }catch(_){}
+  gameUser=null; updateAuthUI(); show('login'); state.scene='title';
+};
 
 // Autosave periódico durante a partida + salvar ao ocultar/sair a aba.
 setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 5000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveNow(); });
 window.addEventListener('pagehide', ()=>{ saveNow(); });
 
+// Se o Supabase está configurado, esconde o título até sabermos se há sessão
+// (initPersistence decide entre 'login' e 'title'). Sem config, joga direto.
+(function(){ const C=window.__ALPS_SB__; if(C && C.url && C.anonKey) show(null); })();
 initPersistence();
 
 // =========================================================================
