@@ -48,7 +48,11 @@ document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='
 // orientationchange, resize e o matchMedia de paisagem. O setTimeout dá um
 // instante para o layout assentar antes de checar a orientação.
 function autoTelaCheiaPaisagem(){ if(!isPortrait() && !isFullscreen()) goFullscreen(); }
-window.addEventListener('orientationchange', ()=>setTimeout(autoTelaCheiaPaisagem, 60));
+// IMPORTANTE: chamamos goFullscreen SÍNCRONO dentro dos handlers para preservar o
+// "gesto do usuário" (ex.: tocar no botão de girar do navegador conta como gesto).
+// Um setTimeout aqui QUEBRARIA esse gesto e o navegador bloquearia a tela cheia.
+// O retry atrasado é só um reforço para quando o layout ainda não assentou.
+window.addEventListener('orientationchange', ()=>{ autoTelaCheiaPaisagem(); setTimeout(autoTelaCheiaPaisagem, 120); });
 window.addEventListener('resize', autoTelaCheiaPaisagem);
 const mqPaisagem = window.matchMedia('(orientation: landscape)');
 if(mqPaisagem.addEventListener) mqPaisagem.addEventListener('change', autoTelaCheiaPaisagem);
