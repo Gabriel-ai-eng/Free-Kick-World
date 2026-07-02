@@ -44,20 +44,27 @@ const toastEl=document.getElementById('toast'); let toastId=null;
 function toast(t){ if(!toastEl) return; toastEl.textContent=t; toastEl.classList.add('on');
   clearTimeout(toastId); toastId=setTimeout(()=>toastEl.classList.remove('on'),1400); }
 
+// Clique com "pulinho": o botão salta/aumenta (classe .pop no hotspot) e a
+// ação roda 170ms depois — tempo de ver o retorno visual antes da tela mudar.
+// (A tela cheia não quebra: o pointerdown global já pede fullscreen no toque.)
+function popGo(id, fn){
+  const el=document.getElementById(id); if(!el) return;
+  el.onclick=()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(fn,170); };
+}
 // "JOGAR" / "INICIAR": se há uma partida pausada (o jogador saiu no meio),
 // RETOMA exatamente de onde parou; senão, inicia uma partida nova.
-document.getElementById('startGame').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('full'); };
-document.getElementById('startQuick').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); };
+popGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
+popGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
 // "RANKING": abre a tela de classificação (placeholder por enquanto).
-document.getElementById('btnRanking').onclick=()=>{ show('tabela'); state.scene='tabela'; };
+popGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
 // "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
-document.getElementById('btnVoltar').onclick=goHome;
+popGo('btnVoltar', goHome);
 // Áreas ainda não implementadas: só avisam "em breve".
-document.getElementById('btnPersonaliza').onclick=()=>toast('Personalização em breve 👕');
-document.getElementById('btnEvento').onclick   =()=>toast('Evento especial em breve ✨');
-document.getElementById('btnEstadio').onclick  =()=>toast('Mais estádios em breve 🏟️');
-document.getElementById('btnSettings').onclick =()=>toast('Configurações em breve ⚙️');
-document.getElementById('btnChat').onclick     =()=>toast('Chat em breve 💬');
+popGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
+popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
+popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
+popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
+popGo('btnChat',        ()=>toast('Chat em breve 💬'));
 // "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de RANKING (placeholder por enquanto)

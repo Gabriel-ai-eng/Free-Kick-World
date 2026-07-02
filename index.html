@@ -41,18 +41,21 @@
 <div id="scrTitle" class="screen">
   <div id="titleWrap">
     <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
+    <!-- Cada hotspot carrega uma cópia da arte (janela espelhada, .mirror):
+         parada é invisível (pixels idênticos ao fundo); ao clicar, o botão
+         salta/aumenta (animação .pop) dando retorno visual do toque. -->
     <!-- Menu à esquerda -->
-    <button class="hotspot" id="startGame"      aria-label="Jogar"></button>
-    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"></button>
-    <button class="hotspot" id="btnRanking"     aria-label="Ranking"></button>
-    <button class="hotspot" id="btnVoltar"      aria-label="Voltar"></button>
+    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnVoltar"      aria-label="Voltar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <!-- Cartões / ações à direita -->
-    <button class="hotspot" id="btnEvento"      aria-label="Evento especial"></button>
-    <button class="hotspot" id="btnEstadio"     aria-label="Estádio"></button>
-    <button class="hotspot" id="startQuick"     aria-label="Iniciar partida rápida"></button>
+    <button class="hotspot" id="btnEvento"      aria-label="Evento especial"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnEstadio"     aria-label="Estádio"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="startQuick"     aria-label="Iniciar partida rápida"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <!-- Topo / rodapé -->
-    <button class="hotspot" id="btnSettings"    aria-label="Configurações"></button>
-    <button class="hotspot" id="btnChat"        aria-label="Chat"></button>
+    <button class="hotspot" id="btnSettings"    aria-label="Configurações"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnChat"        aria-label="Chat"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
   </div>
   <!-- Aviso rápido "em breve" para as áreas ainda não implementadas -->
   <div id="toast"></div>

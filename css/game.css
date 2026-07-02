@@ -26,9 +26,29 @@
      (proporção 6400×2900). Um leve realce ao tocar dá retorno visual. */
   .hotspot { position:absolute; background:transparent; border:none; padding:0; margin:0;
     cursor:pointer; border-radius:12px; -webkit-tap-highlight-color:transparent;
-    transition:background .08s, box-shadow .08s; }
-  .hotspot:active { background:rgba(255,255,255,.12);
-    box-shadow:0 0 0 2px rgba(255,255,255,.25) inset; }
+    overflow:hidden; }
+  /* Janela espelhada: cópia da arte dentro do hotspot, alinhada pixel a pixel
+     com o #titleImg de fundo (mesmas regras: 100vw×100vh + object-fit cover).
+     Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
+  .hotspot .mirror { position:absolute; width:100vw; height:100vh;
+    object-fit:cover; object-position:center; pointer-events:none; }
+  #startGame      .mirror { left:-4.4vw;  top:-43.5vh; }
+  #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
+  #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
+  #btnVoltar      .mirror { left:-4.4vw;  top:-77.5vh; }
+  #btnEvento      .mirror { left:-75.8vw; top:-16vh; }
+  #btnEstadio     .mirror { left:-75.8vw; top:-46.5vh; }
+  #startQuick     .mirror { left:-75.8vw; top:-70vh; }
+  #btnSettings    .mirror { left:-96.5vw; top:-2vh; }
+  #btnChat        .mirror { left:-88vw;   top:-85.5vh; }
+  /* Pop do clique: o botão salta e aumenta um pouco, depois assenta de volta. */
+  .hotspot.pop { animation:btnpop .3s ease-out; z-index:2; }
+  @keyframes btnpop {
+    0%   { transform:scale(1); }
+    35%  { transform:scale(1.12) translateY(-1.5%); }
+    70%  { transform:scale(1.04); }
+    100% { transform:scale(1); }
+  }
   /* Menu à esquerda */
   #startGame      { left:4.4%; top:43.5%; width:22%; height:11%; }
   #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }
