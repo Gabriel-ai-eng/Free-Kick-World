@@ -114,33 +114,18 @@ function ensureClient(){
   return sb;
 }
 
-// Reflete o estado de login na UI (chip "Sair" no topo direito).
-function updateAuthUI(){
-  const chip=document.getElementById('authStatus'), em=document.getElementById('authEmail');
-  if(gameUser){ if(em) em.textContent=gameUser.email||'conta'; if(chip) chip.classList.remove('hidden'); }
-  else { if(chip) chip.classList.add('hidden'); }
-}
-
-// Vai SEMPRE direto para a tela inicial do jogo. Não há mais tela de login: se o
-// jogador já tem sessão do Alps (mesma origem), reaproveitamos para salvar o
-// progresso; sem sessão, apenas joga sem salvar.
+// Vai SEMPRE direto para a tela inicial do jogo. Não há tela de login nem chip de
+// conta: se o jogador já tem sessão do Alps (mesma origem), reaproveitamos ela
+// em silêncio para salvar o progresso; sem sessão, apenas joga sem salvar.
 async function initPersistence(){
   try{
     if(!ensureClient()){ show('title'); state.scene='title'; return; } // sem config: joga sem salvar
     const { data } = await sb.auth.getUser();
     gameUser = (data && data.user) ? data.user : null;
     show('title'); state.scene='title';
-    if(gameUser){ updateAuthUI(); await loadBest(); await loadState(); }
+    if(gameUser){ await loadBest(); await loadState(); }
   }catch(_){ show('title'); state.scene='title'; } // offline: segue sem persistência
 }
-
-// Sair: salva o que der, encerra a sessão e volta para a tela inicial.
-const authStatusBtn=document.getElementById('authStatus');
-if(authStatusBtn) authStatusBtn.onclick=async ()=>{
-  try{ await saveNow(); }catch(_){}
-  try{ if(sb) await sb.auth.signOut(); }catch(_){}
-  gameUser=null; updateAuthUI(); show('title'); state.scene='title';
-};
 
 // Autosave periódico durante a partida + salvar ao ocultar/sair a aba.
 setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 3000);
