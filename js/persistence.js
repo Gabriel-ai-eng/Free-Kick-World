@@ -13,7 +13,15 @@ function snapshot(){
   return {
     scene: state.scene, score: state.score, time: state.time,
     mode: state.mode, half: state.half, clock: state.clock,
-    player: { u:player.u, v:player.v, face:player.face, anim:player.anim, running:player.running },
+    // Estado COMPLETO do jogador para retomar no lugar EXATO onde ele parou
+    // (posição no campo, direção, animação, pulo e chute em andamento).
+    player: {
+      u:player.u, v:player.v, face:player.face, anim:player.anim,
+      moving:player.moving, running:player.running,
+      z:player.z, vz:player.vz,
+      kicking:player.kicking, kickT:player.kickT,
+      jumping:player.jumping, jumpT:player.jumpT,
+    },
     ball:   { u:ball.u, v:ball.v, vu:ball.vu, vv:ball.vv },
     cam:    { near: cam.near, userZoom: cam.userZoom },
     savedAt: Date.now(),
