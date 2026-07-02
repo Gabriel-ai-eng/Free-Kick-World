@@ -113,57 +113,25 @@ function updateAuthUI(){
   else { if(chip) chip.classList.add('hidden'); }
 }
 
-// Traduz os erros mais comuns do Supabase Auth para PT-BR.
-function traduzErroAuth(err){
-  const m=(err && err.message ? err.message : '').toLowerCase();
-  if(m.includes('invalid login')) return 'E-mail ou senha incorretos.';
-  if(m.includes('email not confirmed')) return 'E-mail ainda não confirmado. Confirme pelo app Alps.';
-  if(m.includes('network')||m.includes('fetch')||m.includes('failed to fetch')) return 'Sem conexão. Tente de novo.';
-  return (err && err.message) ? err.message : 'Não foi possível entrar.';
-}
-
+// Vai SEMPRE direto para a tela inicial do jogo. Não há mais tela de login: se o
+// jogador já tem sessão do Alps (mesma origem), reaproveitamos para salvar o
+// progresso; sem sessão, apenas joga sem salvar.
 async function initPersistence(){
   try{
-    if(!ensureClient()){ show('title'); return; }     // sem config: joga sem salvar
+    if(!ensureClient()){ show('title'); state.scene='title'; return; } // sem config: joga sem salvar
     const { data } = await sb.auth.getUser();
     gameUser = (data && data.user) ? data.user : null;
-    if(gameUser){ updateAuthUI(); await loadBest(); show('title'); state.scene='title'; await loadState(); }
-    else { show('login'); }                            // sem sessão: pede login
-  }catch(_){ show('title'); }                          // offline: segue sem persistência
+    show('title'); state.scene='title';
+    if(gameUser){ updateAuthUI(); await loadBest(); await loadState(); }
+  }catch(_){ show('title'); state.scene='title'; } // offline: segue sem persistência
 }
 
-// ---- Login / logout na própria origem do jogo (mesmas contas do Alps) ----
-const loginForm=document.getElementById('loginForm');
-if(loginForm) loginForm.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email=(document.getElementById('loginEmail').value||'').trim().toLowerCase();
-  const pass=document.getElementById('loginPass').value||'';
-  const errEl=document.getElementById('loginErr'), btn=document.getElementById('loginBtn');
-  errEl.textContent='';
-  if(!ensureClient()){ errEl.textContent='Configuração do Supabase ausente.'; return; }
-  if(!email || !pass){ errEl.textContent='Preencha e-mail e senha.'; return; }
-  btn.disabled=true; btn.textContent='ENTRANDO…';
-  try{
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-    if(error) throw error;
-    gameUser = (data && data.user) ? data.user : null;
-    updateAuthUI(); await loadBest();
-    document.getElementById('loginPass').value='';
-    show('title'); state.scene='title'; await loadState();
-  }catch(err){ errEl.textContent=traduzErroAuth(err); }
-  finally{ btn.disabled=false; btn.textContent='ENTRAR'; }
-});
-
-// Jogar como convidado (sem salvar).
-const guestBtn=document.getElementById('playGuest');
-if(guestBtn) guestBtn.onclick=()=>{ gameUser=null; updateAuthUI(); show('title'); state.scene='title'; };
-
-// Sair: salva o que der, encerra a sessão e volta para o login.
+// Sair: salva o que der, encerra a sessão e volta para a tela inicial.
 const authStatusBtn=document.getElementById('authStatus');
 if(authStatusBtn) authStatusBtn.onclick=async ()=>{
   try{ await saveNow(); }catch(_){}
   try{ if(sb) await sb.auth.signOut(); }catch(_){}
-  gameUser=null; updateAuthUI(); show('login'); state.scene='title';
+  gameUser=null; updateAuthUI(); show('title'); state.scene='title';
 };
 
 // Autosave periódico durante a partida + salvar ao ocultar/sair a aba.

@@ -89,15 +89,6 @@
     backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
   #backBtn:active { transform:scale(.93); }
 
-  /* ---------- Login (entrar com a conta do Alps p/ salvar) ---------- */
-  #scrLogin { gap:14px; }
-  .loginForm { display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; }
-  #scrLogin input { font-family:inherit; font-size:16px; padding:13px 14px; border-radius:10px;
-    border:2px solid rgba(148,163,184,.4); background:rgba(15,23,42,.7); color:#e2e8f0; outline:none;
-    user-select:text; -webkit-user-select:text; touch-action:auto; }
-  #scrLogin input:focus { border-color:#7dd3fc; }
-  .loginErr { color:#fca5a5; font-size:13px; min-height:16px; line-height:1.35; }
-  #loginBtn:disabled { opacity:.6; }
   #authStatus { position:fixed; top:10px; right:10px; z-index:60; font-family:inherit; cursor:pointer;
     display:flex; align-items:center; gap:4px; padding:5px 11px; font-size:12px; letter-spacing:.3px;
     color:#e2e8f0; background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4); border-radius:999px;
@@ -113,6 +104,11 @@
   #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
     text-shadow:2px 2px 0 #0a3d62; }
   #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
+  /* Botão "Cancelar" na tela de girar: volta para a Home do Alps. */
+  #rotateCancel { font-family:inherit; cursor:pointer; padding:11px 34px; font-size:15px;
+    letter-spacing:1px; color:#7dd3fc; background:transparent;
+    border:1px solid rgba(125,211,252,.5); border-radius:999px; transition:transform .08s; }
+  #rotateCancel:active { transform:scale(.94); }
   .phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
     position:relative; box-shadow:0 0 26px rgba(125,211,252,.5);
     animation:tilt 2.4s ease-in-out infinite; }

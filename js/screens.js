@@ -11,23 +11,25 @@ function goToTitle(){
   state.scene='title'; show('title');
   saveNow();   // best-effort
 }
+// Sai do jogo para a Home do Alps OS (salva antes, com um teto de 600ms).
+function goHome(){
+  const go=()=>{ window.location.href='/home'; };
+  Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+}
 document.getElementById('backBtn').onclick=()=>{
-  if(state.scene==='title'){
-    const go=()=>{ window.location.href='/home'; };
-    Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
-  } else {
-    goToTitle();
-  }
+  if(state.scene==='title') goHome();
+  else goToTitle();
 };
+// "Cancelar" na tela "VIRE O CELULAR": volta direto para a Home.
+const rotateCancel=document.getElementById('rotateCancel');
+if(rotateCancel) rotateCancel.onclick=goHome;
 
 // =========================================================================
 //  TELAS
 // =========================================================================
-const scr={title:document.getElementById('scrTitle'),login:document.getElementById('scrLogin'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
+const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
-function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
-  // Na tela de login não faz sentido o "Voltar" (não há app hospedeiro aqui).
-  const bb=document.getElementById('backBtn'); if(bb) bb.style.display=(n==='login')?'none':''; }
+function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
 document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
 document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
@@ -37,7 +39,7 @@ document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='
 // Entra em tela cheia SOMENTE quando o celular está DEITADO (paisagem) E o
 // usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
 // O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
-document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen() && scr.login.classList.contains('hidden')) goFullscreen(); });
+document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
 
 // Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
 function goFullscreen(){
