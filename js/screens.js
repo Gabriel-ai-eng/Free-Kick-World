@@ -51,6 +51,26 @@ function isFullscreen(){ return !!(document.fullscreenElement || document.webkit
 document.addEventListener('fullscreenchange', resize);
 document.addEventListener('webkitfullscreenchange', resize);
 
+// Bolinha preta com as flechas (aviso "VIRE O CELULAR"): um único toque cumpre o
+// gesto que o navegador exige, entra em tela cheia e trava em PAISAGEM. Assim o
+// celular "deita" na mesma hora e, como o aviso só aparece em retrato, ele some
+// sozinho e a tela inicial do jogo (que já está por baixo) aparece na hora.
+const rotateBtn = document.getElementById('rotateBtn');
+if(rotateBtn) rotateBtn.addEventListener('click', ()=>{
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  const lockLandscape = ()=>{
+    try { if(screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); } catch(_){}
+  };
+  try {
+    // Alguns navegadores só permitem travar a orientação já em tela cheia; por
+    // isso pedimos a tela cheia primeiro e travamos assim que ela engatar.
+    const r = req && req.call(el);
+    if(r && typeof r.then === 'function') r.then(lockLandscape).catch(lockLandscape);
+    else lockLandscape();
+  } catch(_){ lockLandscape(); }
+});
+
 function startMatch(mode){
   state.mode = (mode==='full') ? 'full' : 'quick';
   goFullscreen();
