@@ -32,14 +32,35 @@ if(rotateCancel) rotateCancel.onclick=goHome;
 // =========================================================================
 const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
-function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
+const backBtn=document.getElementById('backBtn');
+if(backBtn) backBtn.style.display='none';   // a HOME é a 1ª tela; show() cuida do resto
+// Mostra a tela pedida (esconde as outras). Na HOME o próprio menu tem o botão
+// VOLTAR, então escondemos o "← Voltar" do topo para não sobrepor a arte.
+function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
+  if(backBtn) backBtn.style.display = (n==='title') ? 'none' : ''; }
+
+// Toast rápido "em breve" para as áreas ainda não implementadas.
+const toastEl=document.getElementById('toast'); let toastId=null;
+function toast(t){ if(!toastEl) return; toastEl.textContent=t; toastEl.classList.add('on');
+  clearTimeout(toastId); toastId=setTimeout(()=>toastEl.classList.remove('on'),1400); }
+
 // "JOGAR" / "INICIAR": se há uma partida pausada (o jogador saiu no meio),
 // RETOMA exatamente de onde parou; senão, inicia uma partida nova.
 document.getElementById('startGame').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('full'); };
 document.getElementById('startQuick').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); };
+// "RANKING": abre a tela de classificação (placeholder por enquanto).
+document.getElementById('btnRanking').onclick=()=>{ show('tabela'); state.scene='tabela'; };
+// "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
+document.getElementById('btnVoltar').onclick=goHome;
+// Áreas ainda não implementadas: só avisam "em breve".
+document.getElementById('btnPersonaliza').onclick=()=>toast('Personalização em breve 👕');
+document.getElementById('btnEvento').onclick   =()=>toast('Evento especial em breve ✨');
+document.getElementById('btnEstadio').onclick  =()=>toast('Mais estádios em breve 🏟️');
+document.getElementById('btnSettings').onclick =()=>toast('Configurações em breve ⚙️');
+document.getElementById('btnChat').onclick     =()=>toast('Chat em breve 💬');
 // "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
-// Tela de TABELA (placeholder por enquanto)
+// Tela de RANKING (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
 // AUTOMÁTICO ao girar: assim que o celular fica na HORIZONTAL (paisagem) e ainda

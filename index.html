@@ -37,13 +37,25 @@
   <div id="kick" class="actbtn">CHUTAR</div>
 </div>
 
-<!-- TÍTULO (arte cheia do FKW + hotspots sobre JOGAR / INICIAR) -->
+<!-- TÍTULO / HOME (arte cheia do FKW + hotspots sobre os botões da tela) -->
 <div id="scrTitle" class="screen">
   <div id="titleWrap">
     <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
-    <button class="hotspot" id="startGame" aria-label="Jogar"></button>
-    <button class="hotspot" id="startQuick" aria-label="Iniciar partida rápida"></button>
+    <!-- Menu à esquerda -->
+    <button class="hotspot" id="startGame"      aria-label="Jogar"></button>
+    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"></button>
+    <button class="hotspot" id="btnRanking"     aria-label="Ranking"></button>
+    <button class="hotspot" id="btnVoltar"      aria-label="Voltar"></button>
+    <!-- Cartões / ações à direita -->
+    <button class="hotspot" id="btnEvento"      aria-label="Evento especial"></button>
+    <button class="hotspot" id="btnEstadio"     aria-label="Estádio"></button>
+    <button class="hotspot" id="startQuick"     aria-label="Iniciar partida rápida"></button>
+    <!-- Topo / rodapé -->
+    <button class="hotspot" id="btnSettings"    aria-label="Configurações"></button>
+    <button class="hotspot" id="btnChat"        aria-label="Chat"></button>
   </div>
+  <!-- Aviso rápido "em breve" para as áreas ainda não implementadas -->
+  <div id="toast"></div>
 </div>
 
 <!-- FIM -->
@@ -55,10 +67,10 @@
   </div>
 </div>
 
-<!-- TABELA (placeholder — conteúdo virá depois) -->
+<!-- RANKING (placeholder — conteúdo virá depois) -->
 <div id="scrTabela" class="screen hidden">
-  <h1 style="color:#7dd3fc">TABELA</h1>
-  <h2>Em breve 📊</h2>
+  <h1 style="color:#7dd3fc">RANKING</h1>
+  <h2>Em breve 🏆</h2>
   <p class="sub">A classificação vai aparecer aqui em breve.</p>
   <button class="btn ghost" id="tabelaBack">VOLTAR</button>
 </div>
