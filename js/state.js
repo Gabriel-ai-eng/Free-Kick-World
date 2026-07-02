@@ -5,7 +5,9 @@
 // ---------- Estado ----------
 // mode: 'quick' = Partida rápida (60s, contagem regressiva). 'full' = Jogar
 // (partida completa: 1º e 2º tempo de 45 min cada, cronômetro crescente).
-const state = { scene:'title', score:0, time:60, running:false, mode:'quick', half:1, clock:0 };
+// paused: existe uma partida em andamento (guardada) que pode ser RETOMADA no
+// ponto exato ao tocar em Jogar (o jogador saiu para a tela inicial sem terminar).
+const state = { scene:'title', score:0, time:60, running:false, mode:'quick', half:1, clock:0, paused:false };
 const HALF_SECONDS = 45*60;   // duração de cada tempo (45 min). Fácil de ajustar.
 // formata segundos como MM:SS para o cronômetro
 function fmtClock(sec){ const m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }

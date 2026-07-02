@@ -6,10 +6,13 @@
 //  • dentro do jogo / fim / tabela  → volta para a TELA INICIAL (Jogar bola / Ver tabela);
 //  • já na tela inicial              → sai para a Home do Alps OS (salva antes de navegar).
 function goToTitle(){
+  // Se saiu no meio de uma PARTIDA, marca como pausada para poder RETOMAR no
+  // ponto exato (posição do jogador/bola, placar e tempo) ao tocar em Jogar.
+  if(state.scene==='game') state.paused=true;
   state.running=false; clearInterval(timerId);
   hud.classList.remove('on'); pad.classList.remove('on');
   state.scene='title'; show('title');
-  saveNow();   // best-effort
+  saveNow();   // salva o estado (inclusive a partida pausada)
 }
 // Sai do jogo para a Home do Alps OS (salva antes, com um teto de 600ms).
 function goHome(){
@@ -30,9 +33,12 @@ if(rotateCancel) rotateCancel.onclick=goHome;
 const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
-document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
-document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
-document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
+// "JOGAR" / "INICIAR": se há uma partida pausada (o jogador saiu no meio),
+// RETOMA exatamente de onde parou; senão, inicia uma partida nova.
+document.getElementById('startGame').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('full'); };
+document.getElementById('startQuick').onclick=()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); };
+// "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
+document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de TABELA (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
@@ -55,6 +61,7 @@ document.addEventListener('webkitfullscreenchange', resize);
 
 function startMatch(mode){
   state.mode = (mode==='full') ? 'full' : 'quick';
+  state.paused=false;   // partida NOVA: não é retomada
   goFullscreen();
   show(null); state.scene='game'; state.score=0; state.running=true;
   hud.classList.add('on'); pad.classList.add('on');
@@ -73,6 +80,26 @@ function startMatch(mode){
   }
   resetPositions(); startTimer();
   scheduleSave();   // persiste a partida recém-iniciada
+}
+// Retoma uma partida PAUSADA no ponto EXATO: usa o jogador/bola/placar/tempo que
+// já estão na memória (restaurados do Supabase, se veio de outra sessão). NÃO
+// chama resetPositions — por isso tudo fica igual a quando o jogador saiu.
+function resumeMatch(){
+  state.paused=false;
+  goFullscreen();
+  show(null); state.scene='game'; state.running=true;
+  hud.classList.add('on'); pad.classList.add('on');
+  document.getElementById('score').textContent=state.score;
+  const halfEl=document.getElementById('half');
+  if(state.mode==='full'){
+    halfEl.style.display=''; halfEl.textContent=(state.half===2?'2º TEMPO':'1º TEMPO');
+    document.getElementById('time').textContent=fmtClock(state.clock);
+  } else {
+    halfEl.style.display='none';
+    document.getElementById('time').textContent=state.time;
+  }
+  startTimer();     // sem resetPositions: continua de onde parou
+  scheduleSave();
 }
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false; player.z=0; player.vz=0;
@@ -105,7 +132,7 @@ function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
     if(state.time<=0) endMatch();
   }
 },1000); }
-function endMatch(){ state.running=false; clearInterval(timerId);
+function endMatch(){ state.running=false; state.paused=false; clearInterval(timerId);
   hud.classList.remove('on'); pad.classList.remove('on');
   document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
   show('end'); state.scene='end';

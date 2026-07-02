@@ -13,6 +13,9 @@ function snapshot(){
   return {
     scene: state.scene, score: state.score, time: state.time,
     mode: state.mode, half: state.half, clock: state.clock,
+    // paused: havia uma partida em andamento (guardada) ao salvar; será
+    // retomada no ponto exato quando o jogador tocar em Jogar.
+    paused: !!state.paused,
     // Estado COMPLETO do jogador para retomar no lugar EXATO onde ele parou
     // (posição no campo, direção, animação, pulo e chute em andamento).
     player: {
@@ -82,22 +85,17 @@ function applySnapshot(s){
     if(typeof s.cam.userZoom==='number') cam.userZoom=Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, s.cam.userZoom));
     updateCamBtn();
   }
-  if(s.scene==='game'){
-    state.scene='game'; state.score=s.score||0; state.running=true;
+  // Partida em andamento salva (pausada, ou a aba foi fechada no meio do jogo):
+  // restaura TUDO na memória (posição já aplicada acima; aqui o placar, tempo e
+  // modo) e deixa PRONTA para retomar. Fica na tela inicial — ao tocar em Jogar,
+  // resumeMatch() continua no ponto EXATO onde o jogador parou.
+  if(s.paused || s.scene==='game'){
     state.mode = (s.mode==='full') ? 'full' : 'quick';
-    document.getElementById('score').textContent=state.score;
-    const halfEl=document.getElementById('half');
-    if(state.mode==='full'){
-      state.half=s.half||1; state.clock=s.clock||0;
-      halfEl.style.display=''; halfEl.textContent=(state.half===2?'2º TEMPO':'1º TEMPO');
-      document.getElementById('time').textContent=fmtClock(state.clock);
-    } else {
-      state.time=(typeof s.time==='number'?s.time:60);
-      halfEl.style.display='none';
-      document.getElementById('time').textContent=state.time;
-    }
-    show(null); hud.classList.add('on'); pad.classList.add('on');
-    startTimer();
+    state.score = s.score||0;
+    if(state.mode==='full'){ state.half=s.half||1; state.clock=s.clock||0; }
+    else { state.time=(typeof s.time==='number'?s.time:60); }
+    state.paused = true;
+    show('title'); state.scene='title';
   } else if(s.scene==='end'){
     state.scene='end'; state.score=s.score||0;
     document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
