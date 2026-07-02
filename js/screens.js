@@ -42,9 +42,22 @@ document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de TABELA (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
-// Entra em tela cheia SOMENTE quando o celular está DEITADO (paisagem) E o
-// usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
-// O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
+// AUTOMÁTICO ao girar: assim que o celular fica na HORIZONTAL (paisagem) e ainda
+// não está em tela cheia, tenta entrar em tela cheia e travar em paisagem — para
+// que o jogo já comece cheio na mesma hora (igual ao Projeto Armor). Escuta
+// orientationchange, resize e o matchMedia de paisagem. O setTimeout dá um
+// instante para o layout assentar antes de checar a orientação.
+function autoTelaCheiaPaisagem(){ if(!isPortrait() && !isFullscreen()) goFullscreen(); }
+window.addEventListener('orientationchange', ()=>setTimeout(autoTelaCheiaPaisagem, 60));
+window.addEventListener('resize', autoTelaCheiaPaisagem);
+const mqPaisagem = window.matchMedia('(orientation: landscape)');
+if(mqPaisagem.addEventListener) mqPaisagem.addEventListener('change', autoTelaCheiaPaisagem);
+else if(mqPaisagem.addListener) mqPaisagem.addListener(autoTelaCheiaPaisagem); // Safari antigo
+
+// PLANO B (gesto do usuário): a maioria dos navegadores mobile só libera tela
+// cheia a partir de um toque. Quando a rotação não conta como gesto, o
+// requestFullscreen automático acima falha em silêncio — então o primeiro toque
+// na tela (em paisagem) entra em tela cheia. O toque em qualquer lugar serve.
 document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
 
 // Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
