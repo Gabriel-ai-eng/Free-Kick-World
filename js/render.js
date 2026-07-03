@@ -124,6 +124,18 @@ function drawBall(){
   const r=Math.max(3, depthScale(ball.v)*0.085*(cam.spriteScale||1));
   spin+=(Math.abs(ball.vu)+Math.abs(ball.vv))*0.3;
   shadow(p.x,p.y, r*1.1);
+  // Bola nova (imagem): desenha o sprite girando conforme a velocidade.
+  if(typeof ballImg!=='undefined' && ballImg.complete && ballImg.naturalWidth>0){
+    ctx.save();
+    ctx.translate(p.x, p.y-r);
+    ctx.rotate(spin);
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(ballImg, -r, -r, r*2, r*2);
+    ctx.restore();
+    return;
+  }
+  // Fallback procedural (enquanto a imagem carrega / se faltar): bola branca
+  // com um ponto escuro girando.
   ctx.imageSmoothingEnabled=true;
   ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p.x,p.y-r,r,0,Math.PI*2); ctx.fill();
   ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=Math.max(1,r*0.18); ctx.stroke();
