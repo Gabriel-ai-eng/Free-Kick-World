@@ -85,6 +85,13 @@ window.addEventListener('resize', autoTelaCheiaPaisagem);
 const mqPaisagem = window.matchMedia('(orientation: landscape)');
 if(mqPaisagem.addEventListener) mqPaisagem.addEventListener('change', autoTelaCheiaPaisagem);
 else if(mqPaisagem.addListener) mqPaisagem.addListener(autoTelaCheiaPaisagem); // Safari antigo
+// ESSENCIAL: o Chromium (Chrome/Opera/Edge) só libera requestFullscreen SEM
+// toque enquanto dispara o evento 'change' do screen.orientation — girar o
+// celular só conta como gesto dentro dele. Os listeners acima (resize,
+// orientationchange, matchMedia) NÃO carregam essa permissão; sem esta linha
+// a tela cheia automática ao girar era bloqueada em silêncio. É o mesmo
+// listener que faz o Projeto Armor entrar em tela cheia só de virar.
+try { screen.orientation.addEventListener('change', autoTelaCheiaPaisagem); } catch(_){}
 
 // PLANO B (gesto do usuário): a maioria dos navegadores mobile só libera tela
 // cheia a partir de um toque. Quando a rotação não conta como gesto, o

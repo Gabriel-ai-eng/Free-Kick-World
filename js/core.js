@@ -28,5 +28,10 @@ window.addEventListener('orientationchange', resize);
 resize();
 
 // Em retrato mostramos o aviso "vire o celular" e pausamos a partida.
-const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
+// Igual ao Projeto Armor: se o matchMedia OU as dimensões da janela disserem
+// "paisagem", tratamos como paisagem — durante a virada um dos dois pode
+// ficar defasado por um instante, e o outro cobre.
+const isPortrait = () =>
+  window.matchMedia('(orientation: portrait)').matches &&
+  window.innerWidth <= window.innerHeight;
 
