@@ -34,10 +34,10 @@
      Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
   .hotspot .mirror { position:absolute; width:100vw; height:100vh;
     object-fit:cover; object-position:center; pointer-events:none; }
-  /* JOGAR: imagem própria do botão (assets/btn-jogar.png) preenchendo o hotspot,
-     que fica exatamente sobre o frame dourado desenhado. Sem espelho, sem
-     recorte da arte. object-fit:fill casa 1:1 (mesma proporção ~4.12). */
-  #startGame .jogarbtn { position:absolute; inset:0; width:100%; height:100%;
+  /* JOGAR / PERSONALIZAR / RANKING: imagem própria de cada botão preenchendo o
+     hotspot, que fica exatamente sobre o botão desenhado. Sem espelho, sem
+     recorte da arte. object-fit:fill casa 1:1 (mesma proporção do frame). */
+  .btnimg { position:absolute; inset:0; width:100%; height:100%;
     object-fit:fill; pointer-events:none; }
   #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
   #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
@@ -55,18 +55,22 @@
     70%  { transform:scale(1.04); }
     100% { transform:scale(1); }
   }
-  /* JOGAR — microanimação "bounce press": SÓ escala + glow, pivot no centro.
-     A ESCALA é conduzida por JS (transform inline, easeOutBack ao pressionar /
-     overshoot elástico ao soltar). O GLOW dourado abaixo intensifica enquanto o
-     botão está pressionado (+~20%). Nada de posição/arte/ícone/borda/texto muda. */
-  #startGame { transform-origin:50% 50%; will-change:transform;
-    transition:box-shadow .09s ease-out; }
+  /* Microanimação "bounce press": SÓ escala + glow, pivot no centro. A ESCALA é
+     conduzida por JS (transform inline, easeOutBack ao pressionar / overshoot
+     elástico ao soltar). O GLOW abaixo intensifica enquanto o botão é
+     pressionado. Nada de posição/arte/ícone/borda/texto muda. */
+  #startGame, #btnPersonaliza, #btnRanking {
+    transform-origin:50% 50%; will-change:transform; transition:box-shadow .09s ease-out; }
+  /* JOGAR: glow dourado (combina com a borda dourada). */
   #startGame.pressed {
     box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
-  /* Menu à esquerda */
-  #startGame      { left:5%;   top:40.86%; width:21.25%; height:11.38%; }
-  #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }
-  #btnRanking     { left:4.4%; top:67.5%; width:22%; height:9.5%; }
+  /* PERSONALIZAR / RANKING: glow branco-azulado suave (combina com a borda azul). */
+  #btnPersonaliza.pressed, #btnRanking.pressed {
+    box-shadow:0 0 20px 5px rgba(170,200,255,.4), 0 0 6px 1px rgba(220,235,255,.5); }
+  /* Menu à esquerda (posição de cada botão = frame real desenhado na arte) */
+  #startGame      { left:5%; top:40.86%; width:21.25%; height:11.38%; }
+  #btnPersonaliza { left:5%; top:53.94%; width:21.25%; height:10.33%; }
+  #btnRanking     { left:5%; top:64.87%; width:21.25%; height:10.33%; }
   #btnVoltar      { left:4.4%; top:77.5%; width:22%; height:9.5%; }
   /* Cartões / ações à direita */
   #btnEvento      { left:75.8%; top:16%;  width:22.4%; height:27%; }

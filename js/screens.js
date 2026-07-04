@@ -112,12 +112,12 @@ function pressGo(id, fn){
 // senão, inicia uma partida nova.
 pressGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
 popGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
-// "RANKING": abre a tela de classificação (placeholder por enquanto).
-popGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
+// "RANKING": bounce press → abre a tela de classificação (placeholder).
+pressGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
+// "PERSONALIZAR": bounce press → aviso "em breve" (ainda não implementado).
+pressGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
 // "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
 popGo('btnVoltar', goHome);
-// Áreas ainda não implementadas: só avisam "em breve".
-popGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
 popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
 popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
