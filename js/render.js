@@ -81,8 +81,12 @@ function drawPlayer(){
   const jumping = player.jumping;
   const kicking = player.kicking && !jumping;
   const run = !kicking && !jumping && player.running && player.moving;
-  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
-  const sprite = jumping ? A.jump : kicking ? A.kick : (run ? A.runner : A.walk);
+  // PARADO com animação de idle (se a folha já carregou); senão, cai no quadro 0
+  // da caminhada. A folha idle é enquadrada igual à caminhada (mesma altura/pés).
+  const idleReady = (typeof A.idle!=='undefined') && A.idle.complete && A.idle.naturalWidth>0 && typeof IDLE_SH!=='undefined';
+  const idle = !jumping && !kicking && !player.moving && idleReady;
+  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : idle ? IDLE_SH : (run ? RUN_SH : WALK_SH);
+  const sprite = jumping ? A.jump : kicking ? A.kick : idle ? A.idle : (run ? A.runner : A.walk);
   const ss=cam.spriteScale||1;                    // contra-escala p/ manter o tamanho na tela
   const h=depthScale(player.v)*ss, w=h*(sheet.FW/sheet.FH);
   const pz=player.z*ss;                            // altura do pulo acompanha a contra-escala
@@ -98,8 +102,10 @@ function drawPlayer(){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.jumpT)));
   } else if(kicking){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.kickT)));
+  } else if(idle){
+    f = Math.floor(performance.now()/IDLE_MS) % IDLE_SH.frames;   // loop por tempo
   } else if(!player.moving){
-    f = 0;
+    f = 0;   // fallback: idle não carregou → quadro parado da caminhada
   } else if(sheet === WALK_SH){
     const last = sheet.frames - 1;            // 42 (último quadro)
     const n = sheet.frames - 2;               // 41 quadros úteis (sem o 0 e o 41)
