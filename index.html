@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<!-- viewport-fit=cover: em tela cheia, o jogo desenha também na área do recorte
+     da câmera (notch/furo) — sem isso o navegador deixa faixas pretas nas
+     laterais em paisagem. Os controles usam env(safe-area-inset-*) no CSS
+     para não ficarem embaixo da câmera. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Free Kick World ⚽</title>
 <link rel="stylesheet" href="css/game.css" />
 </head>
