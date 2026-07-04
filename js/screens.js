@@ -27,6 +27,12 @@ document.getElementById('backBtn').onclick=()=>{
 const rotateCancel=document.getElementById('rotateCancel');
 if(rotateCancel) rotateCancel.onclick=goHome;
 
+// Segurar o dedo (long-press) sobre a arte da tela inicial abria o menu do
+// navegador (Google Lens / salvar imagem / compartilhar…). Como é um jogo,
+// bloqueamos esse menu de contexto em qualquer lugar — assim o toque longo
+// não interrompe mais a experiência.
+document.addEventListener('contextmenu', e=>e.preventDefault());
+
 // =========================================================================
 //  TELAS
 // =========================================================================
