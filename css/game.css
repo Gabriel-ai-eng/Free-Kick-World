@@ -49,6 +49,14 @@
     70%  { transform:scale(1.04); }
     100% { transform:scale(1); }
   }
+  /* JOGAR — microanimação "bounce press": SÓ escala + glow, pivot no centro.
+     A ESCALA é conduzida por JS (transform inline, easeOutBack ao pressionar /
+     overshoot elástico ao soltar). O GLOW dourado abaixo intensifica enquanto o
+     botão está pressionado (+~20%). Nada de posição/arte/ícone/borda/texto muda. */
+  #startGame { transform-origin:50% 50%; will-change:transform;
+    transition:box-shadow .09s ease-out; }
+  #startGame.pressed {
+    box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
   /* Menu à esquerda */
   #startGame      { left:4.4%; top:43.5%; width:22%; height:11%; }
   #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }

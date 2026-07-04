@@ -51,9 +51,60 @@ function popGo(id, fn){
   const el=document.getElementById(id); if(!el) return;
   el.onclick=()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(fn,170); };
 }
-// "JOGAR" / "INICIAR": se há uma partida pausada (o jogador saiu no meio),
-// RETOMA exatamente de onde parou; senão, inicia uma partida nova.
-popGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
+
+// "Bounce press" do botão JOGAR: microanimação de feedback com SÓ escala e glow,
+// pivot exatamente no centro (transform-origin 50% 50%). Usa o próprio sprite/UI
+// do botão (a janela espelhada), sem recriar nada.
+//   • pointer down → escala 1.00→1.08 em ~80ms (easeOutBack, "salto") + glow +20%
+//   • segurando    → mantém 1.08 e o glow reforçado
+//   • pointer up   → 1.08→1.00 com pequeno overshoot em 1.03 (~120ms, elástico)
+// A ação roda logo após soltar, para o bounce ser visível antes da tela mudar
+// (a tela cheia é preservada pelo pointerdown global, que já pede fullscreen).
+function pressGo(id, fn){
+  const el=document.getElementById(id); if(!el) return;
+  el.style.transformOrigin='50% 50%';
+  let raf=0, held=false;
+  const easeOutBack=t=>{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
+  const curScale=()=>{ const m=/scale\(([\d.]+)\)/.exec(el.style.transform); return m?parseFloat(m[1]):1; };
+  function anim(dur, sample, done){
+    cancelAnimationFrame(raf);
+    const t0=performance.now();
+    (function frame(now){
+      let p=(now-t0)/dur; if(p>1) p=1;
+      el.style.transform='scale('+sample(p).toFixed(4)+')';
+      if(p<1) raf=requestAnimationFrame(frame); else { raf=0; if(done) done(); }
+    })(performance.now());
+  }
+  function press(){
+    if(held) return; held=true;
+    el.classList.add('pressed'); el.style.zIndex='3';
+    const from=curScale();
+    anim(80, p=> from + (1.08-from)*easeOutBack(p));   // salto até 1.08 (easeOutBack)
+  }
+  function release(runAction){
+    if(!held) return; held=false;
+    el.classList.remove('pressed');
+    const from=curScale();                              // normalmente 1.08
+    anim(120, p=>{                                      // 1.08 → 1.00 → 1.03 → 1.00
+      if(p<0.5)  return from + (1.00-from)*(p/0.5);
+      if(p<0.78) return 1.00 + 0.03*((p-0.5)/0.28);
+      return 1.03 - 0.03*((p-0.78)/0.22);
+    }, ()=>{ el.style.transform='scale(1)'; el.style.zIndex=''; });
+    if(runAction) setTimeout(fn, 130);
+  }
+  el.addEventListener('pointerdown', press);
+  el.addEventListener('pointerup',   ()=>release(true));
+  el.addEventListener('pointercancel', ()=>release(false));
+  el.addEventListener('pointerleave', ()=>release(false));
+  // Teclado (acessibilidade): mesmo bounce ao acionar por Enter/Espaço.
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); press(); } });
+  el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ release(true); } });
+}
+
+// "JOGAR": bounce press. "INICIAR": mantém o pop simples.
+// Se há uma partida pausada (o jogador saiu no meio), RETOMA de onde parou;
+// senão, inicia uma partida nova.
+pressGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
 popGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
 // "RANKING": abre a tela de classificação (placeholder por enquanto).
 popGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
