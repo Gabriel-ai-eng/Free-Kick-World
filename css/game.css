@@ -154,7 +154,10 @@
   #rotate { position:fixed; inset:0; z-index:50; display:none;
     flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
     background:radial-gradient(circle at 50% 38%, #0b1424, #05080f); text-align:center; }
-  @media (orientation:portrait) { #rotate { display:flex; } }
+  @media (orientation:portrait) { #rotate { display:flex; }
+    /* Na tela "VIRE O CELULAR" (retrato) não mostra o "← Voltar" do topo — ele
+       ficava piscando por cima do overlay. A própria tela já tem o "Cancelar". */
+    #backBtn { display:none !important; } }
   #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
     text-shadow:2px 2px 0 #0a3d62; }
   #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
