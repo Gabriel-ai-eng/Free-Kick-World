@@ -64,12 +64,15 @@ function popGo(id, fn){
 //   • pointer down → escala 1.00→1.08 em ~80ms (easeOutBack, "salto") + glow +20%
 //   • segurando    → mantém 1.08 e o glow reforçado
 //   • pointer up   → 1.08→1.00 com pequeno overshoot em 1.03 (~120ms, elástico)
-// A ação roda logo após soltar, para o bounce ser visível antes da tela mudar
-// (a tela cheia é preservada pelo pointerdown global, que já pede fullscreen).
+// A AÇÃO (navegar/redirecionar) SÓ acontece num TOQUE RÁPIDO — clicar e soltar
+// quase na mesma hora (< TAP_MS). Se o usuário CLICAR E SEGURAR e só depois
+// soltar, o botão apenas salta e volta, SEM redirecionar. (No teclado, Enter/
+// Espaço sempre aciona, por acessibilidade.)
+const TAP_MS = 250;
 function pressGo(id, fn){
   const el=document.getElementById(id); if(!el) return;
   el.style.transformOrigin='50% 50%';
-  let raf=0, held=false;
+  let raf=0, held=false, pressT=0;
   const easeOutBack=t=>{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
   const curScale=()=>{ const m=/scale\(([\d.]+)\)/.exec(el.style.transform); return m?parseFloat(m[1]):1; };
   function anim(dur, sample, done){
@@ -82,12 +85,14 @@ function pressGo(id, fn){
     })(performance.now());
   }
   function press(){
-    if(held) return; held=true;
+    if(held) return; held=true; pressT=performance.now();
     el.classList.add('pressed'); el.style.zIndex='3';
     const from=curScale();
     anim(80, p=> from + (1.08-from)*easeOutBack(p));   // salto até 1.08 (easeOutBack)
   }
-  function release(runAction){
+  // runAction: houve intenção de acionar (pointerup/keyup, não cancel).
+  // force: ignora o tempo (teclado sempre aciona).
+  function release(runAction, force){
     if(!held) return; held=false;
     el.classList.remove('pressed');
     const from=curScale();                              // normalmente 1.08
@@ -96,15 +101,17 @@ function pressGo(id, fn){
       if(p<0.78) return 1.00 + 0.03*((p-0.5)/0.28);
       return 1.03 - 0.03*((p-0.78)/0.22);
     }, ()=>{ el.style.transform='scale(1)'; el.style.zIndex=''; });
-    if(runAction) setTimeout(fn, 130);
+    // Só redireciona se foi um TOQUE RÁPIDO (ou teclado). Segurar → só o salto.
+    const tap = (performance.now()-pressT) < TAP_MS;
+    if(runAction && (force || tap)) setTimeout(fn, 130);
   }
   el.addEventListener('pointerdown', press);
-  el.addEventListener('pointerup',   ()=>release(true));
-  el.addEventListener('pointercancel', ()=>release(false));
-  el.addEventListener('pointerleave', ()=>release(false));
-  // Teclado (acessibilidade): mesmo bounce ao acionar por Enter/Espaço.
+  el.addEventListener('pointerup',   ()=>release(true, false));
+  el.addEventListener('pointercancel', ()=>release(false, false));
+  el.addEventListener('pointerleave', ()=>release(false, false));
+  // Teclado (acessibilidade): mesmo bounce ao acionar por Enter/Espaço (sempre aciona).
   el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); press(); } });
-  el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ release(true); } });
+  el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ release(true, true); } });
 }
 
 // "JOGAR": bounce press. "INICIAR": mantém o pop simples.
