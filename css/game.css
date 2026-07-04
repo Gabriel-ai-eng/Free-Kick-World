@@ -59,23 +59,23 @@
      conduzida por JS (transform inline, easeOutBack ao pressionar / overshoot
      elástico ao soltar). O GLOW abaixo intensifica enquanto o botão é
      pressionado. Nada de posição/arte/ícone/borda/texto muda. */
-  #startGame, #btnPersonaliza, #btnRanking {
+  #startGame, #btnPersonaliza, #btnRanking, #btnVoltar, #startQuick {
     transform-origin:50% 50%; will-change:transform; transition:box-shadow .09s ease-out; }
-  /* JOGAR: glow dourado (combina com a borda dourada). */
-  #startGame.pressed {
+  /* JOGAR / INICIAR: glow dourado (combina com a borda amarela). */
+  #startGame.pressed, #startQuick.pressed {
     box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
-  /* PERSONALIZAR / RANKING: glow branco-azulado suave (combina com a borda azul). */
-  #btnPersonaliza.pressed, #btnRanking.pressed {
+  /* PERSONALIZAR / RANKING / VOLTAR: glow branco-azulado (combina com a borda azul). */
+  #btnPersonaliza.pressed, #btnRanking.pressed, #btnVoltar.pressed {
     box-shadow:0 0 20px 5px rgba(170,200,255,.4), 0 0 6px 1px rgba(220,235,255,.5); }
   /* Menu à esquerda (posição de cada botão = frame real desenhado na arte) */
   #startGame      { left:5%; top:40.86%; width:21.25%; height:11.38%; }
   #btnPersonaliza { left:5%; top:53.94%; width:21.25%; height:10.33%; }
   #btnRanking     { left:5%; top:64.87%; width:21.25%; height:10.33%; }
-  #btnVoltar      { left:4.4%; top:77.5%; width:22%; height:9.5%; }
+  #btnVoltar      { left:5%; top:77.02%; width:21.25%; height:10.44%; }
   /* Cartões / ações à direita */
-  #btnEvento      { left:75.8%; top:16%;  width:22.4%; height:27%; }
-  #btnEstadio     { left:75.8%; top:46.5%; width:22.4%; height:22%; }
-  #startQuick     { left:75.8%; top:70%;  width:22.4%; height:12.5%; }
+  #btnEvento      { left:75.8%;  top:16%;    width:22.4%;  height:27%; }
+  #btnEstadio     { left:75.8%;  top:46.5%;  width:22.4%;  height:22%; }
+  #startQuick     { left:76.95%; top:69.31%; width:17.70%; height:13.10%; }
   /* Topo (engrenagem) e rodapé (chat) */
   #btnSettings    { left:96.5%; top:2%;   width:3.2%;  height:8%; border-radius:50%; }
   #btnChat        { left:88%;  top:85.5%; width:11%;   height:8.5%; }

@@ -111,13 +111,13 @@ function pressGo(id, fn){
 // Se há uma partida pausada (o jogador saiu no meio), RETOMA de onde parou;
 // senão, inicia uma partida nova.
 pressGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
-popGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
+pressGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
 // "RANKING": bounce press → abre a tela de classificação (placeholder).
 pressGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
 // "PERSONALIZAR": bounce press → aviso "em breve" (ainda não implementado).
 pressGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
-// "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
-popGo('btnVoltar', goHome);
+// "VOLTAR" (menu da home): bounce press → sai para a Home do Alps OS (salva antes).
+pressGo('btnVoltar', goHome);
 popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
 popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
