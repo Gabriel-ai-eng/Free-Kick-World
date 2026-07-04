@@ -34,7 +34,11 @@
      Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
   .hotspot .mirror { position:absolute; width:100vw; height:100vh;
     object-fit:cover; object-position:center; pointer-events:none; }
-  #startGame      .mirror { left:-4.4vw;  top:-43.5vh; }
+  /* JOGAR: imagem própria do botão (assets/btn-jogar.png) preenchendo o hotspot,
+     que fica exatamente sobre o frame dourado desenhado. Sem espelho, sem
+     recorte da arte. object-fit:fill casa 1:1 (mesma proporção ~4.12). */
+  #startGame .jogarbtn { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:fill; pointer-events:none; }
   #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
   #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
   #btnVoltar      .mirror { left:-4.4vw;  top:-77.5vh; }
@@ -60,7 +64,7 @@
   #startGame.pressed {
     box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
   /* Menu à esquerda */
-  #startGame      { left:4.4%; top:43.5%; width:22%; height:11%; }
+  #startGame      { left:5%;   top:40.86%; width:21.25%; height:11.38%; }
   #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }
   #btnRanking     { left:4.4%; top:67.5%; width:22%; height:9.5%; }
   #btnVoltar      { left:4.4%; top:77.5%; width:22%; height:9.5%; }

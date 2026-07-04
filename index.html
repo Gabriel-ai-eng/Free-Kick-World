@@ -45,7 +45,10 @@
          parada é invisível (pixels idênticos ao fundo); ao clicar, o botão
          salta/aumenta (animação .pop) dando retorno visual do toque. -->
     <!-- Menu à esquerda -->
-    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <!-- JOGAR: imagem PRÓPRIA do botão (transparente) sobreposta EXATAMENTE em
+         cima do botão desenhado na arte. Nada da arte é recortado; é este <img>
+         que salta na animação de toque (pressGo). -->
+    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="jogarbtn" src="assets/btn-jogar.png" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnVoltar"      aria-label="Voltar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
