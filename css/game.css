@@ -156,26 +156,26 @@
   /* ---------- Overlay: gire o celular para a horizontal ---------- */
   #rotate { position:fixed; inset:0; z-index:50; display:none;
     flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
-    background:radial-gradient(circle at 50% 38%, #0b1424, #05080f); text-align:center; }
+    background:radial-gradient(circle at 50% 38%, #0b2018, #05080f); text-align:center; }
   @media (orientation:portrait) { #rotate { display:flex; }
     /* Na tela "VIRE O CELULAR" (retrato) não mostra o "← Voltar" do topo — ele
        ficava piscando por cima do overlay. A própria tela já tem o "Cancelar". */
     #backBtn { display:none !important; } }
-  #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
-    text-shadow:2px 2px 0 #0a3d62; }
+  #rotate h2 { color:#a7f3d0; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
+    text-shadow:2px 2px 0 #14532d; }
   #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
   /* Botão "Cancelar" na tela de girar: volta para a Home do Alps. */
   #rotateCancel { font-family:inherit; cursor:pointer; padding:11px 34px; font-size:15px;
-    letter-spacing:1px; color:#7dd3fc; background:transparent;
-    border:1px solid rgba(125,211,252,.5); border-radius:999px; transition:transform .08s; }
+    letter-spacing:1px; color:#a7f3d0; background:transparent;
+    border:1px solid rgba(167,243,208,.5); border-radius:999px; transition:transform .08s; }
   #rotateCancel:active { transform:scale(.94); }
-  .phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
-    position:relative; box-shadow:0 0 26px rgba(125,211,252,.5);
+  .phone { width:62px; height:110px; border:5px solid #a7f3d0; border-radius:14px;
+    position:relative; box-shadow:0 0 26px rgba(134,239,172,.45);
     animation:tilt 2.4s ease-in-out infinite; }
   .phone::before { content:''; position:absolute; left:50%; bottom:7px; width:20px; height:4px;
-    border-radius:3px; background:#7dd3fc; transform:translateX(-50%); }
+    border-radius:3px; background:#a7f3d0; transform:translateX(-50%); }
   .phone::after { content:''; position:absolute; inset:7px; border-radius:7px;
-    background:rgba(125,211,252,.12); }
+    background:rgba(134,239,172,.12); }
   @keyframes tilt {
     0%,16%   { transform:rotate(0deg); }
     46%,72%  { transform:rotate(-90deg); }

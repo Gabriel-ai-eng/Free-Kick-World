@@ -6,4 +6,4 @@
 A.runner = new Image();
 A.runner.src = 'assets/player_run.png';
 A.runner.onload = onPlayerSprite;
-const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
+const RUN_SH = { FW:215, FH:304, cols:5, rows:4, frames:20 };

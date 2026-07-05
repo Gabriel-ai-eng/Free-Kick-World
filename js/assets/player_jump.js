@@ -8,7 +8,7 @@
 A.jump = new Image();
 A.jump.src = 'assets/player_jump.png';
 A.jump.onload = onPlayerSprite;
-const JUMP_SH = { FW:172, FH:291, cols:15, rows:14, frames:200 };
+const JUMP_SH = { FW:86, FH:145, cols:15, rows:14, frames:200 };
 const JUMP_FPS = 185;        // velocidade de reproducao da animacao de pulo
 const JUMP_TO = 57;          // frame de DECOLAGEM (pes saem do chao)
 const JUMP_LD = 168;         // frame de ATERRISSAGEM (pes tocam o chao)

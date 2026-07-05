@@ -8,4 +8,4 @@
 A.walk = new Image();
 A.walk.src = 'assets/player_walk.png';
 A.walk.onload = onPlayerSprite;
-const WALK_SH = { FW:340, FH:664, cols:9, rows:5, frames:43 };
+const WALK_SH = { FW:170, FH:332, cols:9, rows:5, frames:43 };

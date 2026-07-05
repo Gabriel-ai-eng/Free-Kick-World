@@ -27,6 +27,15 @@ window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', resize);
 resize();
 
+// Android/Chrome pode DESCARTAR o contexto 2D do canvas sob pressão de memória
+// (o canvas fica preto, mas a página continua viva). Quando o navegador avisa
+// que o contexto voltou, refazemos o tamanho e as camadas fixas do estádio.
+cv.addEventListener('contextlost', e=>{ e.preventDefault(); });
+cv.addEventListener('contextrestored', ()=>{
+  resize();
+  try { if(typeof Stadium!=='undefined' && Stadium.built) Stadium.rebuild(); } catch(_){}
+});
+
 // Em retrato mostramos o aviso "vire o celular" e pausamos a partida.
 // Igual ao Projeto Armor: se o matchMedia OU as dimensões da janela disserem
 // "paisagem", tratamos como paisagem — durante a virada um dos dois pode
