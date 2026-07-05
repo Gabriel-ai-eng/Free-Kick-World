@@ -9,5 +9,5 @@
 // muda o tamanho nem a posição. Lida da esquerda p/ a direita, de cima p/ baixo.
 A.idle = new Image();
 A.idle.src = 'assets/player_idle.png';
-const IDLE_SH = { FW:114, FH:184, cols:10, rows:6, frames:60 };
-const IDLE_MS = 60;   // ms por quadro (~3.6s de loop calmo)
+const IDLE_SH = { FW:140, FH:276, cols:10, rows:21, frames:202 };
+const IDLE_MS = 40;   // ms por quadro (~8s de loop calmo e suave)
