@@ -49,9 +49,12 @@
          parada é invisível (pixels idênticos ao fundo); ao clicar, o botão
          salta/aumenta (animação .pop) dando retorno visual do toque. -->
     <!-- Menu à esquerda -->
-    <!-- JOGAR / PERSONALIZAR / RANKING: imagem PRÓPRIA de cada botão (transparente)
-         sobreposta EXATAMENTE em cima do botão desenhado na arte. Nada da arte é
-         recortado; é este <img> que salta na animação de toque (pressGo). -->
+    <!-- JOGAR / PERSONALIZAR / RANKING / VOLTAR / INICIAR: imagem PRÓPRIA de cada
+         botão (PNG transparente, nova arte) sobreposta EXATAMENTE em cima do botão
+         desenhado na arte. O encaixe em QUALQUER proporção de tela é garantido por
+         JS (alignBtnArt em screens.js): o retângulo de cada botão, em pixels da
+         arte 6400×2900, é projetado para a tela com a MESMA matemática do
+         object-fit:cover do fundo. É este <img> que salta no toque (pressGo). -->
     <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="btnimg" src="assets/btn-jogar.png?v=2" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="btnimg" src="assets/btn-personalizar.png?v=2" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="btnimg" src="assets/btn-ranking.png?v=2" alt="" draggable="false" /></button>

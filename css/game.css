@@ -34,19 +34,22 @@
      Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
   .hotspot .mirror { position:absolute; width:100vw; height:100vh;
     object-fit:cover; object-position:center; pointer-events:none; }
-  /* JOGAR / PERSONALIZAR / RANKING: imagem própria de cada botão preenchendo o
-     hotspot, que fica exatamente sobre o botão desenhado. Sem espelho, sem
-     recorte da arte. object-fit:fill casa 1:1 (mesma proporção do frame). */
+  /* JOGAR / PERSONALIZAR / RANKING / VOLTAR / INICIAR: imagem própria (PNG novo,
+     transparente) preenchendo o hotspot, que fica exatamente sobre o botão
+     desenhado. object-fit:fill casa 1:1 (mesma proporção do frame). O encaixe
+     em QUALQUER proporção de tela é feito por JS (alignBtnArt em screens.js),
+     que projeta o retângulo do botão (em px da arte 6400×2900) com a mesma
+     matemática do object-fit:cover do fundo — os % abaixo são apenas o chute
+     inicial antes do primeiro alinhamento. */
   .btnimg { position:absolute; inset:0; width:100%; height:100%;
     object-fit:fill; pointer-events:none; }
-  #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
-  #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
-  #btnVoltar      .mirror { left:-4.4vw;  top:-77.5vh; }
-  #btnEvento      .mirror { left:-75.8vw; top:-16vh; }
-  #btnEstadio     .mirror { left:-75.8vw; top:-46.5vh; }
-  #startQuick     .mirror { left:-75.8vw; top:-70vh; }
-  #btnSettings    .mirror { left:-96.5vw; top:-2vh; }
-  #btnChat        .mirror { left:-88vw;   top:-85.5vh; }
+  /* Cartões/ações restantes: janela espelhada (cópia da arte com o MESMO
+     object-fit:cover do fundo) — autoalinha ao frame desenhado em qualquer
+     proporção de tela. O offset é o negativo da posição (left/top) do hotspot. */
+  #btnEvento      .mirror { left:-75.8vw;  top:-16vh; }
+  #btnEstadio     .mirror { left:-75.8vw;  top:-46.5vh; }
+  #btnSettings    .mirror { left:-96.5vw;  top:-2vh; }
+  #btnChat        .mirror { left:-88vw;    top:-85.5vh; }
   /* Pop do clique: o botão salta e aumenta um pouco, depois assenta de volta. */
   .hotspot.pop { animation:btnpop .3s ease-out; z-index:2; }
   @keyframes btnpop {

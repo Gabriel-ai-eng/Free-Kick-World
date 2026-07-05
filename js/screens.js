@@ -45,6 +45,37 @@ if(backBtn) backBtn.style.display='none';   // a HOME é a 1ª tela; show() cuid
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
   if(backBtn) backBtn.style.display = (n==='title') ? 'none' : ''; }
 
+// ---------- AUTOALINHAMENTO DOS BOTÕES COM ARTE PRÓPRIA (btnimg) ----------
+// O fundo (#titleImg) usa object-fit:cover; quando a tela não tem a proporção
+// ~2.2 da arte, o cover corta as sobras e os botões desenhados saem do lugar
+// fixo em %. Aqui projetamos o retângulo de cada botão — medido em PIXELS da
+// arte original (6400×2900) — para a tela com a MESMA matemática do cover
+// (escala = max, sobra centralizada). Assim o PNG transparente de cada botão
+// assenta pixel a pixel sobre o botão desenhado em QUALQUER proporção de tela,
+// sem distorcer (o retângulo projetado preserva a proporção da arte).
+const ART_W=6400, ART_H=2900;
+const BTN_ART = {                       // [x, y, w, h] em px da arte
+  startGame:      [ 320.0, 1184.9, 1360.0, 330.0],
+  btnPersonaliza: [ 320.0, 1564.3, 1360.0, 299.6],
+  btnRanking:     [ 320.0, 1881.2, 1360.0, 299.6],
+  btnVoltar:      [ 320.0, 2233.6, 1360.0, 302.8],
+  startQuick:     [4924.8, 2010.0, 1132.8, 379.9],
+};
+function alignBtnArt(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const s=Math.max(vw/ART_W, vh/ART_H);           // escala do object-fit:cover
+  const ox=(vw-ART_W*s)/2, oy=(vh-ART_H*s)/2;     // sobra cortada, centralizada
+  for(const id in BTN_ART){
+    const el=document.getElementById(id); if(!el) continue;
+    const r=BTN_ART[id];
+    el.style.left =(ox+r[0]*s)+'px'; el.style.top   =(oy+r[1]*s)+'px';
+    el.style.width=(r[2]*s)+'px';    el.style.height=(r[3]*s)+'px';
+  }
+}
+window.addEventListener('resize', alignBtnArt);
+window.addEventListener('orientationchange', alignBtnArt);
+alignBtnArt();
+
 // Toast rápido "em breve" para as áreas ainda não implementadas.
 const toastEl=document.getElementById('toast'); let toastId=null;
 function toast(t){ if(!toastEl) return; toastEl.textContent=t; toastEl.classList.add('on');
