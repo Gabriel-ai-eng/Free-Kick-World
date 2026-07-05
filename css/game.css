@@ -34,19 +34,23 @@
      Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
   .hotspot .mirror { position:absolute; width:100vw; height:100vh;
     object-fit:cover; object-position:center; pointer-events:none; }
-  /* JOGAR / PERSONALIZAR / RANKING: imagem própria de cada botão preenchendo o
-     hotspot, que fica exatamente sobre o botão desenhado. Sem espelho, sem
-     recorte da arte. object-fit:fill casa 1:1 (mesma proporção do frame). */
-  .btnimg { position:absolute; inset:0; width:100%; height:100%;
-    object-fit:fill; pointer-events:none; }
-  #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
-  #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
-  #btnVoltar      .mirror { left:-4.4vw;  top:-77.5vh; }
-  #btnEvento      .mirror { left:-75.8vw; top:-16vh; }
-  #btnEstadio     .mirror { left:-75.8vw; top:-46.5vh; }
-  #startQuick     .mirror { left:-75.8vw; top:-70vh; }
-  #btnSettings    .mirror { left:-96.5vw; top:-2vh; }
-  #btnChat        .mirror { left:-88vw;   top:-85.5vh; }
+  /* TODOS os botões usam a "janela espelhada" (.mirror): uma cópia da arte com o
+     MESMO object-fit:cover do fundo. Assim o botão se autoalinha ao frame
+     desenhado em QUALQUER proporção de tela (o fundo é cover, então uma janela
+     também cover mostra exatamente o mesmo pixel). O offset de cada .mirror é o
+     negativo da posição (left/top) do seu hotspot, para trazer a cópia de volta
+     à origem da viewport — igual aos cartões da direita, que sempre encaixaram.
+     (Botões esticados com object-fit:fill em caixa vw/vh distorciam e saíam do
+     lugar quando a tela não tinha a proporção ~2.2 do design.) */
+  #startGame      .mirror { left:-5vw;     top:-40.86vh; }
+  #btnPersonaliza .mirror { left:-5vw;     top:-53.94vh; }
+  #btnRanking     .mirror { left:-5vw;     top:-64.87vh; }
+  #btnVoltar      .mirror { left:-5vw;     top:-77.02vh; }
+  #btnEvento      .mirror { left:-75.8vw;  top:-16vh; }
+  #btnEstadio     .mirror { left:-75.8vw;  top:-46.5vh; }
+  #startQuick     .mirror { left:-76.95vw; top:-69.31vh; }
+  #btnSettings    .mirror { left:-96.5vw;  top:-2vh; }
+  #btnChat        .mirror { left:-88vw;    top:-85.5vh; }
   /* Pop do clique: o botão salta e aumenta um pouco, depois assenta de volta. */
   .hotspot.pop { animation:btnpop .3s ease-out; z-index:2; }
   @keyframes btnpop {
