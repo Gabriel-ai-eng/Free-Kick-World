@@ -143,11 +143,18 @@ function pressGo(id, fn){
   el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ release(true); } });
 }
 
-// "JOGAR": bounce press. "INICIAR": mantém o pop simples.
-// Se há uma partida pausada (o jogador saiu no meio), RETOMA de onde parou;
-// senão, inicia uma partida nova.
-pressGo('startGame', ()=>{ if(state.paused) resumeMatch(); else startMatch('full'); });
-pressGo('startQuick', ()=>{ if(state.paused) resumeMatch(); else startMatch('quick'); });
+// "JOGAR" e "INICIAR PARTIDA RÁPIDA" são JOGOS SEPARADOS, cada um com seu
+// próprio save (tabelas próprias no Supabase — ver persistence.js). O botão de
+// um modo retoma a partida pausada DAQUELE modo (na memória ou vinda do banco)
+// ou começa uma partida nova dele; nunca mexe no save do outro jogo.
+function playMode(mode){
+  if(state.paused && state.mode===mode){ resumeMatch(); return; }   // pausada agora há pouco
+  const s=(typeof savedGames!=='undefined') ? savedGames[mode] : null;
+  if(s && (s.paused || s.scene==='game')){ applyMatchSnapshot(s); resumeMatch(); return; }
+  startMatch(mode);
+}
+pressGo('startGame',  ()=>playMode('full'));
+pressGo('startQuick', ()=>playMode('quick'));
 // "RANKING": bounce press → abre a tela de classificação (placeholder).
 pressGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
 // "PERSONALIZAR": bounce press → aviso "em breve" (ainda não implementado).

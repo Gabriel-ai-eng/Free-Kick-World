@@ -9,6 +9,21 @@
 // no localStorage. Sem login/sem config, o jogo segue funcionando sem salvar.
 let sb=null, gameUser=null, saveQueued=false;
 
+// ---------- JOGOS SEPARADOS ----------
+// "Jogar" (partida completa) e "Partida Rápida" são JOGOS INDEPENDENTES: cada
+// um tem suas PRÓPRIAS tabelas no Supabase e seu próprio save — pausar/terminar
+// um não mexe no save do outro.
+//   full  (Jogar)          → fkw_game_state       / fkw_match_history
+//   quick (Partida Rápida) → fkw_quick_game_state / fkw_quick_match_history
+const SAVE_TABLES = {
+  full:  { state:'fkw_game_state',       history:'fkw_match_history' },
+  quick: { state:'fkw_quick_game_state', history:'fkw_quick_match_history' },
+};
+// Save de cada jogo carregado/atualizado na memória. O save de um jogo só entra
+// em campo quando o jogador toca no botão DAQUELE jogo (playMode em screens.js).
+const savedGames = { full:null, quick:null };
+const modeKey = m => (m==='full' ? 'full' : 'quick');
+
 function snapshot(){
   return {
     scene: state.scene, score: state.score, time: state.time,
@@ -38,69 +53,90 @@ function scheduleSave(){
 }
 
 async function saveNow(){
+  // Na tela inicial sem partida pausada em memória não há nada novo a salvar —
+  // e escrever aqui sobrescreveria o save (ainda não retomado) daquele jogo.
+  if(state.scene==='title' && !state.paused) return;
+  const mode=modeKey(state.mode);
+  const snap=snapshot();
+  savedGames[mode]=snap;               // memória primeiro: vale mesmo sem login
   if(!sb || !gameUser) return;
   try{
-    await sb.from('fkw_game_state').upsert({
-      user_id: gameUser.id, state: snapshot(), updated_at: new Date().toISOString(),
+    await sb.from(SAVE_TABLES[mode].state).upsert({
+      user_id: gameUser.id, state: snap, updated_at: new Date().toISOString(),
     });
   }catch(_){}
 }
 
 async function recordHistory(score){
   if(!sb || !gameUser) return;
+  const mode=modeKey(state.mode);
+  const dur = (mode==='full' && typeof HALF_SECONDS!=='undefined') ? HALF_SECONDS*2 : 60;
   try{
-    await sb.from('fkw_match_history').insert({ user_id: gameUser.id, score: score, duration: 60 });
+    await sb.from(SAVE_TABLES[mode].history)
+      .insert({ user_id: gameUser.id, score: score, duration: dur, mode: mode });
   }catch(_){}
 }
 
 async function loadBest(){
   if(!sb || !gameUser) return;
   try{
-    const { data } = await sb.from('fkw_match_history')
-      .select('score').eq('user_id', gameUser.id).order('score',{ ascending:false }).limit(1);
-    const best = (data && data[0]) ? data[0].score : 0;
+    // Recorde geral = melhor placar entre os DOIS jogos (cada um no seu banco).
+    const q = t => sb.from(t).select('score').eq('user_id', gameUser.id)
+                     .order('score',{ ascending:false }).limit(1);
+    const [f, k] = await Promise.all([ q(SAVE_TABLES.full.history), q(SAVE_TABLES.quick.history) ]);
+    const best = Math.max(
+      (f.data && f.data[0]) ? f.data[0].score : 0,
+      (k.data && k.data[0]) ? k.data[0].score : 0);
     const el = document.getElementById('recorde');
     if(el) el.textContent = best>0 ? `🏆 Seu recorde: ${best} gol${best===1?'':'s'}` : '';
   }catch(_){}
 }
 
-// Lê o estado salvo do usuário no Supabase e retoma de onde parou (posição do
-// jogador/bola, placar, tempo, cena). Sem isso, o jogo sempre começava do zero.
+// Lê o save de CADA jogo (Jogar e Partida Rápida) para a memória. NADA entra em
+// campo ainda: o save de um jogo só é aplicado quando o jogador toca no botão
+// daquele jogo (playMode → applyMatchSnapshot → resumeMatch).
 async function loadState(){
   if(!sb || !gameUser) return;
   try{
-    const { data } = await sb.from('fkw_game_state')
-      .select('state').eq('user_id', gameUser.id).limit(1);
-    const row = data && data[0];
-    if(row && row.state) applySnapshot(row.state);
+    const read = t => sb.from(t).select('state').eq('user_id', gameUser.id).limit(1)
+      .then(r => (r.data && r.data[0]) ? r.data[0].state : null, () => null);
+    const rows = await Promise.all([ read(SAVE_TABLES.full.state), read(SAVE_TABLES.quick.state) ]);
+    // Compatibilidade: um save antigo de Partida Rápida pode estar na tabela do
+    // Jogar (era compartilhada antes da separação). Classifica cada snapshot
+    // pelo MODO gravado nele; em duplicidade, fica o mais recente.
+    for(const s of rows){
+      if(!s) continue;
+      const m=modeKey(s.mode);
+      if(!savedGames[m] || (s.savedAt||0) > (savedGames[m].savedAt||0)) savedGames[m]=s;
+    }
+    // Preferências de câmera e possível tela de fim: do save mais recente.
+    const rec=[savedGames.full, savedGames.quick].filter(Boolean)
+      .sort((a,b)=>(b.savedAt||0)-(a.savedAt||0))[0];
+    if(rec && rec.cam){
+      cam.near=!!rec.cam.near;
+      if(typeof rec.cam.userZoom==='number') cam.userZoom=Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, rec.cam.userZoom));
+      updateCamBtn();
+    }
+    if(rec && rec.scene==='end' && !rec.paused && state.scene==='title'){
+      state.scene='end'; state.score=rec.score||0; state.mode=modeKey(rec.mode);
+      document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
+      show('end');
+    }
   }catch(_){ /* offline/sem estado: começa na tela inicial */ }
 }
 
-function applySnapshot(s){
-  if(!s || state.scene!=='title') return;   // não sobrescreve se o usuário já começou
+// Coloca em campo o save de UM jogo — chamado na hora de retomar aquele jogo
+// (toque no botão do modo). Restaura posição do jogador/bola, placar e tempo,
+// e marca como pausado: resumeMatch() continua do ponto EXATO.
+function applyMatchSnapshot(s){
+  if(!s) return;
   if(s.player) Object.assign(player, s.player);
   if(s.ball)   Object.assign(ball, s.ball);
-  if(s.cam){
-    cam.near=!!s.cam.near;
-    if(typeof s.cam.userZoom==='number') cam.userZoom=Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, s.cam.userZoom));
-    updateCamBtn();
-  }
-  // Partida em andamento salva (pausada, ou a aba foi fechada no meio do jogo):
-  // restaura TUDO na memória (posição já aplicada acima; aqui o placar, tempo e
-  // modo) e deixa PRONTA para retomar. Fica na tela inicial — ao tocar em Jogar,
-  // resumeMatch() continua no ponto EXATO onde o jogador parou.
-  if(s.paused || s.scene==='game'){
-    state.mode = (s.mode==='full') ? 'full' : 'quick';
-    state.score = s.score||0;
-    if(state.mode==='full'){ state.half=s.half||1; state.clock=s.clock||0; }
-    else { state.time=(typeof s.time==='number'?s.time:60); }
-    state.paused = true;
-    show('title'); state.scene='title';
-  } else if(s.scene==='end'){
-    state.scene='end'; state.score=s.score||0;
-    document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
-    show('end');
-  }
+  state.mode = modeKey(s.mode);
+  state.score = s.score||0;
+  if(state.mode==='full'){ state.half=s.half||1; state.clock=s.clock||0; }
+  else { state.time=(typeof s.time==='number'?s.time:60); }
+  state.paused = true;
 }
 
 // Cria o cliente supabase uma única vez (necessário já na tela de login).
