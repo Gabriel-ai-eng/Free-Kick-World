@@ -4,6 +4,6 @@
 // =========================================================================
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 A.runner = new Image();
-A.runner.src = 'assets/player_run.png';
+A.runner.src = 'assets/player_run.webp';
 A.runner.onload = onPlayerSprite;
 const RUN_SH = { FW:215, FH:304, cols:5, rows:4, frames:20 };

@@ -6,7 +6,7 @@
 // pulo NÃO está embutido: a altura (z) é gerada por código e sincronizada com a
 // animação (decolagem JUMP_TO → aterrissagem JUMP_LD).
 A.jump = new Image();
-A.jump.src = 'assets/player_jump.png';
+A.jump.src = 'assets/player_jump.webp';
 A.jump.onload = onPlayerSprite;
 const JUMP_SH = { FW:86, FH:145, cols:15, rows:14, frames:200 };
 const JUMP_FPS = 185;        // velocidade de reproducao da animacao de pulo

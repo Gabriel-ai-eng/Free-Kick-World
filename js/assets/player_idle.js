@@ -11,6 +11,6 @@ A.idle = new Image();
 // ?v=2 força o navegador a buscar a folha nova: a grade mudou (140x276, 202
 // quadros) e um player_idle.png antigo em cache, com a grade velha, desmontaria
 // o desenho. Ao trocar a arte, mude a folha E suba esse número junto.
-A.idle.src = 'assets/player_idle.png?v=2';
+A.idle.src = 'assets/player_idle.webp?v=3';
 const IDLE_SH = { FW:140, FH:276, cols:10, rows:21, frames:202 };
 const IDLE_MS = 40;   // ms por quadro (~8s de loop calmo e suave)

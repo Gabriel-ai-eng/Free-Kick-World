@@ -6,7 +6,7 @@
 // tronco com os pés na base. O contato do pé com a bola é um EVENTO no frame
 // exato (KICK_CONTACT): só então a bola ganha velocidade.
 A.kick = new Image();
-A.kick.src = 'assets/player_kick.png';
+A.kick.src = 'assets/player_kick.webp';
 A.kick.onload = onPlayerSprite;
 const KICK_SH = { FW:136, FH:136, cols:12, rows:15, frames:180 };
 const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
