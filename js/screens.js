@@ -89,58 +89,53 @@ function popGo(id, fn){
   el.onclick=()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(fn,170); };
 }
 
-// "Bounce press" do botão JOGAR: microanimação de feedback com SÓ escala e glow,
-// pivot exatamente no centro (transform-origin 50% 50%). Usa o próprio sprite/UI
-// do botão (a janela espelhada), sem recriar nada.
-//   • pointer down → escala 1.00→1.08 em ~80ms (easeOutBack, "salto") + glow +20%
-//   • segurando    → mantém 1.08 e o glow reforçado
-//   • pointer up   → 1.08→1.00 com pequeno overshoot em 1.03 (~120ms, elástico)
-// A AÇÃO dispara AO SOLTAR sobre o botão — tanto no toque rápido quanto no
-// clicar-e-segurar (igual ao menu do Projeto Armor: segurar mantém o botão
-// aceso e a navegação acontece quando o dedo solta). Só NÃO aciona se o dedo
-// sair do botão antes de soltar (pointerleave/cancel — o "desistir").
-function pressGo(id, fn){
-  const el=document.getElementById(id); if(!el) return;
-  el.style.transformOrigin='50% 50%';
-  let raf=0, held=false;
-  const easeOutBack=t=>{ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(t-1,3) + c1*Math.pow(t-1,2); };
-  const curScale=()=>{ const m=/scale\(([\d.]+)\)/.exec(el.style.transform); return m?parseFloat(m[1]):1; };
-  function anim(dur, sample, done){
-    cancelAnimationFrame(raf);
-    const t0=performance.now();
-    (function frame(now){
-      let p=(now-t0)/dur; if(p>1) p=1;
-      el.style.transform='scale('+sample(p).toFixed(4)+')';
-      if(p<1) raf=requestAnimationFrame(frame); else { raf=0; if(done) done(); }
-    })(performance.now());
+// ---------- ONDA / EFEITO PIANO DOS BOTÕES DO MENU (igual ao Projeto Armor) ----------
+// Segurar e deslizar o dedo pelos botões da tela inicial cria uma "onda": cada
+// botão ACENDE e salta (.is-ativo) e, quando o dedo passa para o próximo, ele
+// SOLTA com um pulso que se acalma (.is-onda → keyframe fkwOnda no CSS). Um toque
+// limpo — sem vaguear para outro botão — aciona a ação daquele botão (com o mesmo
+// pulso de retorno). Também vale para o clicar-e-segurar: o botão fica aceso
+// enquanto o dedo está pressionado e aciona ao soltar.
+//   • O botão sob o dedo é achado por elementFromPoint. O pointer fica "capturado"
+//     no botão onde o gesto começou (setPointerCapture), então o pointermove
+//     continua chegando aqui mesmo quando o dedo desliza para os vizinhos —
+//     exatamente como o menu do Projeto Armor.
+//   • A escala + o glow são aplicados na ARTE (.btnimg via classe no hotspot); o
+//     hotspot não se mexe, então o alvo do toque fica estável durante o gesto.
+function setupMenuWave(acoes){
+  const arrasto = { ativo:false, atual:null, inicio:null, vagou:false };
+  const acender = id=>{ const el=document.getElementById(id); if(!el) return;
+    el.classList.remove('is-onda'); el.classList.add('is-ativo'); };
+  const soltarOnda = id=>{ const el=document.getElementById(id); if(!el) return;
+    el.classList.remove('is-ativo','is-onda'); void el.offsetWidth; el.classList.add('is-onda'); };
+  const botaoSob = (x,y)=>{ const alvo=document.elementFromPoint(x,y);
+    const btn=(alvo&&alvo.closest)?alvo.closest('.hotspot'):null;
+    return (btn && acoes[btn.id]) ? btn.id : null; };
+  const down = (e,id)=>{ try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){}
+    arrasto.ativo=true; arrasto.atual=id; arrasto.inicio=id; arrasto.vagou=false; acender(id); };
+  const move = e=>{ if(!arrasto.ativo) return;
+    const id=botaoSob(e.clientX,e.clientY);
+    if(!id || id===arrasto.atual) return;   // ainda no mesmo botão (ou entre eles)
+    if(arrasto.atual) soltarOnda(arrasto.atual);   // o anterior sai numa onda
+    acender(id); arrasto.atual=id; arrasto.vagou=true; };
+  const up = ()=>{ if(!arrasto.ativo) return;
+    const { atual, inicio, vagou } = arrasto;
+    if(atual) soltarOnda(atual);
+    arrasto.ativo=false; arrasto.atual=null; arrasto.inicio=null; arrasto.vagou=false;
+    // Toque limpo (não vagou e soltou no MESMO botão) → aciona após 130ms, tempo
+    // de ver o pulso antes de a tela mudar.
+    if(!vagou && inicio && inicio===atual) setTimeout(acoes[inicio], 130); };
+  const fimAnim = e=>{ if(e.animationName==='fkwOnda') e.currentTarget.classList.remove('is-onda'); };
+  for(const id in acoes){ const el=document.getElementById(id); if(!el) continue;
+    el.addEventListener('pointerdown', e=>down(e,id));
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('animationend', fimAnim);
+    // Teclado (acessibilidade): Enter/Espaço acende e aciona com o mesmo pulso.
+    el.addEventListener('keydown', e=>{ if((e.key==='Enter'||e.key===' ')&&!e.repeat){ e.preventDefault(); acender(id); } });
+    el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ soltarOnda(id); setTimeout(acoes[id],130); } });
   }
-  function press(){
-    if(held) return; held=true;
-    el.classList.add('pressed'); el.style.zIndex='3';
-    const from=curScale();
-    anim(80, p=> from + (1.08-from)*easeOutBack(p));   // salto até 1.08 (easeOutBack)
-  }
-  // runAction: houve intenção de acionar (pointerup/keyup). No cancel/leave
-  // (dedo saiu do botão antes de soltar) o botão só assenta, sem navegar.
-  function release(runAction){
-    if(!held) return; held=false;
-    el.classList.remove('pressed');
-    const from=curScale();                              // normalmente 1.08
-    anim(120, p=>{                                      // 1.08 → 1.00 → 1.03 → 1.00
-      if(p<0.5)  return from + (1.00-from)*(p/0.5);
-      if(p<0.78) return 1.00 + 0.03*((p-0.5)/0.28);
-      return 1.03 - 0.03*((p-0.78)/0.22);
-    }, ()=>{ el.style.transform='scale(1)'; el.style.zIndex=''; });
-    // Soltou sobre o botão → aciona (toque rápido OU segurar-e-soltar, como no Armor).
-    if(runAction) setTimeout(fn, 130);
-  }
-  el.addEventListener('pointerdown', press);
-  el.addEventListener('pointerup',   ()=>release(true));
-  el.addEventListener('pointercancel', ()=>release(false));
-  el.addEventListener('pointerleave', ()=>release(false));
-  // Teclado (acessibilidade): mesmo bounce ao acionar por Enter/Espaço.
-  el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); press(); } });
-  el.addEventListener('keyup',   e=>{ if(e.key==='Enter'||e.key===' '){ release(true); } });
 }
 
 // "JOGAR" e "INICIAR PARTIDA RÁPIDA" são JOGOS SEPARADOS, cada um com seu
@@ -153,14 +148,16 @@ function playMode(mode){
   if(s && (s.paused || s.scene==='game')){ applyMatchSnapshot(s); resumeMatch(); return; }
   startMatch(mode);
 }
-pressGo('startGame',  ()=>playMode('full'));
-pressGo('startQuick', ()=>playMode('quick'));
-// "RANKING": bounce press → abre a tela de classificação (placeholder).
-pressGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
-// "PERSONALIZAR": bounce press → aviso "em breve" (ainda não implementado).
-pressGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
-// "VOLTAR" (menu da home): bounce press → sai para a Home do Alps OS (salva antes).
-pressGo('btnVoltar', goHome);
+// Os 5 botões da tela inicial (arte PNG própria) usam o efeito ONDA + ação no
+// toque limpo. JOGAR e INICIAR são jogos SEPARADOS (ver playMode); RANKING abre a
+// classificação; PERSONALIZAR avisa "em breve"; VOLTAR sai para a Home do Alps OS.
+setupMenuWave({
+  startGame:      ()=>playMode('full'),
+  startQuick:     ()=>playMode('quick'),
+  btnRanking:     ()=>{ show('tabela'); state.scene='tabela'; },
+  btnPersonaliza: ()=>toast('Personalização em breve 👕'),
+  btnVoltar:      goHome,
+});
 popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
 popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
