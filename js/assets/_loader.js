@@ -3,7 +3,7 @@
 // ASSETS / LOADER — infraestrutura compartilhada dos assets.
 // -------------------------------------------------------------------------
 // Cada IMAGEM tem o SEU próprio arquivo aqui em js/assets/, com o MESMO nome do
-// arquivo lá em assets/. Ex.: assets/goal-left.png  ↔  js/assets/goal-left.js.
+// arquivo lá em assets/. Ex.: assets/goal-left.webp  ↔  js/assets/goal-left.js.
 // Nesse arquivo fica: ONDE a imagem é carregada, ONDE ela se posiciona e QUAL o
 // tamanho dos quadros. O DESENHO em si (como a grama e os gols são pintados no
 // campo) continua em js/stadium.js; o desenho do jogador em js/render.js.

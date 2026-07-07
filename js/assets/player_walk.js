@@ -1,6 +1,6 @@
 "use strict";
 // =========================================================================
-// assets/player_walk.png — sprite sheet de CAMINHADA do jogador.
+// assets/player_walk.webp — sprite sheet de CAMINHADA do jogador.
 // =========================================================================
 // FW/FH = tamanho de cada quadro DENTRO do PNG; cols/rows = colunas/linhas da
 // grade; frames = quantos quadros usar. Folha ORIGINAL, como desenhada (perfil

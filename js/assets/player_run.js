@@ -1,6 +1,6 @@
 "use strict";
 // =========================================================================
-// assets/player_run.png — sprite sheet de CORRIDA do jogador.
+// assets/player_run.webp — sprite sheet de CORRIDA do jogador.
 // =========================================================================
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 A.runner = new Image();

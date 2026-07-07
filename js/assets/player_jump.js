@@ -1,6 +1,6 @@
 "use strict";
 // =========================================================================
-// assets/player_jump.png — sprite sheet de PULO do jogador.
+// assets/player_jump.webp — sprite sheet de PULO do jogador.
 // =========================================================================
 // 15 colunas x 14 linhas = 200 quadros (perfil p/ direita). O arco vertical do
 // pulo NÃO está embutido: a altura (z) é gerada por código e sincronizada com a

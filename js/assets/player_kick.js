@@ -1,6 +1,6 @@
 "use strict";
 // =========================================================================
-// assets/player_kick.png — sprite sheet de CHUTE PARADO do jogador.
+// assets/player_kick.webp — sprite sheet de CHUTE PARADO do jogador.
 // =========================================================================
 // 12 colunas x 15 linhas = 180 quadros (perfil p/ direita), alinhados pelo
 // tronco com os pés na base. O contato do pé com a bola é um EVENTO no frame
