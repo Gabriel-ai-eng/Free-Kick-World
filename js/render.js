@@ -94,9 +94,8 @@ function drawPlayer(){
   const sj=1/(1+pz/Math.max(20,h*0.6));
   shadow(p.x, p.y, w*0.42*sj);
   // quadro de animação
-  // O 1º quadro da folha de caminhada é a pose PARADO: usado só quando o
-  // jogador não anda. Andando, pulamos esse quadro (0) e também o penúltimo
-  // (41), que é idêntico ao último (42), e ciclamos pelos demais.
+  // A folha de caminhada é um ciclo contínuo (18 quadros): andando, passamos por
+  // TODOS em sequência (loop). Parado (sem a folha de idle) cai no quadro 0.
   let f;
   if(jumping){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.jumpT)));
@@ -106,11 +105,6 @@ function drawPlayer(){
     f = Math.floor(performance.now()/IDLE_MS) % IDLE_SH.frames;   // loop por tempo
   } else if(!player.moving){
     f = 0;   // fallback: idle não carregou → quadro parado da caminhada
-  } else if(sheet === WALK_SH){
-    const last = sheet.frames - 1;            // 42 (último quadro)
-    const n = sheet.frames - 2;               // 41 quadros úteis (sem o 0 e o 41)
-    const idx = Math.floor(player.anim) % n;  // 0..40
-    f = idx < n - 1 ? idx + 1 : last;         // 1..40 e depois 42 (pula o 41)
   } else {
     f = Math.floor(player.anim) % sheet.frames;
   }

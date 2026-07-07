@@ -6,6 +6,6 @@
 // grade; frames = quantos quadros usar. Folha ORIGINAL, como desenhada (perfil
 // p/ direita): lida da esquerda p/ a direita e, ao fim da linha, na de baixo.
 A.walk = new Image();
-A.walk.src = 'assets/player_walk.webp';
+A.walk.src = 'assets/player_walk.webp?v=2';
 A.walk.onload = onPlayerSprite;
-const WALK_SH = { FW:170, FH:332, cols:9, rows:5, frames:43 };
+const WALK_SH = { FW:365, FH:673, cols:10, rows:2, frames:18 };
