@@ -42,7 +42,9 @@
      matemática do object-fit:cover do fundo — os % abaixo são apenas o chute
      inicial antes do primeiro alinhamento. */
   .btnimg { position:absolute; inset:0; width:100%; height:100%;
-    object-fit:fill; pointer-events:none; }
+    object-fit:fill; pointer-events:none;
+    transform-origin:50% 50%; will-change:transform,filter;
+    transition:transform .1s ease-out, filter .1s ease-out; }
   /* Cartões/ações restantes: janela espelhada (cópia da arte com o MESMO
      object-fit:cover do fundo) — autoalinha ao frame desenhado em qualquer
      proporção de tela. O offset é o negativo da posição (left/top) do hotspot. */
@@ -58,18 +60,35 @@
     70%  { transform:scale(1.04); }
     100% { transform:scale(1); }
   }
-  /* Microanimação "bounce press": SÓ escala + glow, pivot no centro. A ESCALA é
-     conduzida por JS (transform inline, easeOutBack ao pressionar / overshoot
-     elástico ao soltar). O GLOW abaixo intensifica enquanto o botão é
-     pressionado. Nada de posição/arte/ícone/borda/texto muda. */
+  /* ---- ONDA / EFEITO PIANO (igual ao Projeto Armor) ----
+     Segurar e deslizar o dedo pelos botões do menu cria uma ONDA: cada botão
+     ACENDE e salta (.is-ativo) e, quando o dedo passa para o próximo, ele SOLTA
+     com um pulso que se acalma (.is-onda → keyframe fkwOnda). Um toque limpo
+     (sem vaguear) aciona a ação. A escala + o glow ficam na ARTE (.btnimg); o
+     hotspot (área de toque) não se mexe, então o alvo do dedo fica estável
+     durante o gesto. Cada botão traz a própria cor de glow via --glowA/--glowB:
+     dourado nos amarelos (JOGAR/INICIAR), azul nos escuros. */
+  #startGame, #startQuick {
+    --glowA:rgba(255,201,64,.95); --glowB:rgba(255,214,92,.55); }
+  #btnPersonaliza, #btnRanking, #btnVoltar {
+    --glowA:rgba(150,205,255,.95); --glowB:rgba(90,160,255,.55); }
+  /* Estes 5 usam PNG próprio: o salto/glow pode transbordar o retângulo, então
+     nada de recortar (overflow) e o dedo não rola a tela (touch-action). */
   #startGame, #btnPersonaliza, #btnRanking, #btnVoltar, #startQuick {
-    transform-origin:50% 50%; will-change:transform; transition:box-shadow .09s ease-out; }
-  /* JOGAR / INICIAR: glow dourado (combina com a borda amarela). */
-  #startGame.pressed, #startQuick.pressed {
-    box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
-  /* PERSONALIZAR / RANKING / VOLTAR: glow branco-azulado (combina com a borda azul). */
-  #btnPersonaliza.pressed, #btnRanking.pressed, #btnVoltar.pressed {
-    box-shadow:0 0 20px 5px rgba(170,200,255,.4), 0 0 6px 1px rgba(220,235,255,.5); }
+    overflow:visible; touch-action:none; }
+  .hotspot.is-ativo, .hotspot.is-onda { z-index:4; }
+  .hotspot.is-ativo .btnimg {
+    transform:scale(1.15);
+    filter:drop-shadow(0 0 8px var(--glowA)) drop-shadow(0 0 18px var(--glowB)); }
+  .hotspot.is-onda .btnimg { animation:fkwOnda .5s cubic-bezier(.2,.9,.25,1) forwards; }
+  @keyframes fkwOnda {
+    0%   { transform:scale(1.15);
+           filter:drop-shadow(0 0 8px var(--glowA)) drop-shadow(0 0 18px var(--glowB)); }
+    32%  { transform:scale(1.28);
+           filter:drop-shadow(0 0 15px var(--glowA)) drop-shadow(0 0 28px var(--glowB)); }
+    100% { transform:scale(1);
+           filter:drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  }
   /* Menu à esquerda (posição de cada botão = frame real desenhado na arte) */
   #startGame      { left:5%; top:40.86%; width:21.25%; height:11.38%; }
   #btnPersonaliza { left:5%; top:53.94%; width:21.25%; height:10.33%; }
