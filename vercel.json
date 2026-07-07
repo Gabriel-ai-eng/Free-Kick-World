@@ -1,5 +1,24 @@
 {
+  "//": "Cache explicito: tudo que voce edita (html, js, css, imagens) e servido com must-revalidate, entao qualquer alteracao publicada na main aparece no proximo carregamento, sem cache preso. So a lib de terceiros (vendor) tem cache longo.",
   "headers": [
+    {
+      "source": "/vendor/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
+      "source": "/js/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/css/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [
@@ -7,9 +26,21 @@
       ]
     },
     {
-      "source": "/vendor/(.*)",
+      "source": "/supabase-config.js",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
     }
   ]
