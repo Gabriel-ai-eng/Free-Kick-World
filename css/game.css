@@ -138,6 +138,49 @@
     letter-spacing:.02em; white-space:nowrap;
     text-shadow:0 .06em .16em rgba(0,0,0,.9); }
 
+  /* ---------- Tela de CONFIGURAÇÕES: arte cheia + controles reais por cima ----------
+     A arte (fkw-settings.webp) usa as MESMAS regras do fundo da home
+     (100vw×100vh + object-fit:cover). Os controles são posicionados e
+     dimensionados por JS (alignCfg em screens.js) a partir de retângulos em
+     pixels da arte 6400×2900 — o font-size vem do JS e os tamanhos internos
+     usam `em`, então tudo escala junto em qualquer proporção de tela. */
+  #scrSettings { padding:0; gap:0; background:#05080f; }
+  #cfgWrap { position:relative; line-height:0; }
+  #cfgImg { display:block; width:100vw; height:100vh; object-fit:cover; object-position:center; }
+  .cfg-el { position:absolute; z-index:3; }
+
+  /* Seta do seletor de idioma (decorativa, ao lado de "Português (Brasil)") */
+  #cfgSeta { pointer-events:none; display:flex; align-items:center; justify-content:center; }
+  #cfgSeta svg { width:78%; height:78%; filter:drop-shadow(0 0 .05em rgba(47,155,255,.55)); }
+
+  /* Interruptor (linha "Notificações"): trilho azul aceso quando ligado,
+     bolinha escura com aro claro — como no modelo. */
+  #cfgToggle { border:.03em solid rgba(255,255,255,.22); cursor:pointer;
+    border-radius:999px; padding:0; background:#3a4966;
+    box-shadow:inset 0 0 .1em rgba(0,0,0,.55);
+    transition:background .18s ease, box-shadow .18s ease; }
+  #cfgToggle .cfg-knob { position:absolute; top:50%; left:7%; height:80%; aspect-ratio:1;
+    transform:translateY(-50%); border-radius:50%; background:#9fb0c8;
+    border:.045em solid rgba(255,255,255,.85); box-shadow:0 .04em .12em rgba(0,0,0,.55);
+    transition:left .18s ease, background .18s ease; }
+  #cfgToggle.on { background:linear-gradient(90deg,#1f8fff,#3ec7ff);
+    box-shadow:0 0 .3em rgba(47,155,255,.55); }
+  #cfgToggle.on .cfg-knob { left:47%; background:#0b1626; }
+
+  /* Barras de volume: trilha com preenchimento azul, bolinha e porcentagem */
+  .cfg-slider { display:flex; align-items:center; gap:.5em; touch-action:none; cursor:pointer; }
+  .cfg-track { position:relative; flex:1; height:.2em; border-radius:1em;
+    background:rgba(155,190,225,.30); }
+  .cfg-fill { position:absolute; left:0; top:0; bottom:0; border-radius:1em;
+    background:linear-gradient(90deg,#1f8fff,#3ed0ff);
+    box-shadow:0 0 .16em rgba(62,190,255,.65); }
+  .cfg-knobbar { position:absolute; top:50%; width:.72em; height:.72em; border-radius:50%;
+    background:#2f9bff; border:.06em solid #eaf6ff; transform:translate(-50%,-50%);
+    box-shadow:0 0 .28em rgba(62,190,255,.9); }
+  .cfg-pct { min-width:2.7em; text-align:right; color:#eef6ff; font-weight:700;
+    font-family:'Segoe UI', system-ui, Arial, sans-serif; font-size:.58em; line-height:1;
+    letter-spacing:.02em; text-shadow:0 .08em .22em rgba(0,0,0,.8); }
+
   /* Aviso rápido "em breve" para áreas ainda não implementadas */
   #toast { position:fixed; left:50%; bottom:8%; transform:translate(-50%,20px);
     z-index:30; padding:12px 22px; border-radius:999px; pointer-events:none;

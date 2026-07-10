@@ -36,14 +36,16 @@ document.addEventListener('contextmenu', e=>e.preventDefault());
 // =========================================================================
 //  TELAS
 // =========================================================================
-const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
+const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela'),settings:document.getElementById('scrSettings')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 const backBtn=document.getElementById('backBtn');
 if(backBtn) backBtn.style.display='none';   // a HOME é a 1ª tela; show() cuida do resto
 // Mostra a tela pedida (esconde as outras). Na HOME o próprio menu tem o botão
 // VOLTAR, então escondemos o "← Voltar" do topo para não sobrepor a arte.
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
-  if(backBtn) backBtn.style.display = (n==='title') ? 'none' : ''; }
+  // Sem o "← Voltar" do topo na HOME (o menu tem o próprio VOLTAR) e nas
+  // CONFIGURAÇÕES (a arte já tem a seta de voltar, com hotspot próprio).
+  if(backBtn) backBtn.style.display = (n==='title'||n==='settings') ? 'none' : ''; }
 
 // ---------- AUTOALINHAMENTO DOS BOTÕES COM ARTE PRÓPRIA (btnimg) ----------
 // O fundo (#titleImg) usa object-fit:cover; quando a tela não tem a proporção
@@ -187,8 +189,94 @@ setupMenuWave({
 });
 popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
-popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
+popGo('btnSettings',    ()=>{ show('settings'); state.scene='settings'; });
 popGo('btnChat',        ()=>toast('Chat em breve 💬'));
+
+// =========================================================================
+//  CONFIGURAÇÕES — arte própria (fkw-settings.webp) + controles reais
+// =========================================================================
+// A arte já traz desenhados o cabeçalho, o perfil e as linhas/cartões. Aqui
+// ficam apenas os elementos INTERATIVOS, projetados sobre a arte com a MESMA
+// matemática cover dos botões da home (retângulos em px da arte 6400×2900):
+//   • cfgVoltar  → hotspot sobre a seta "voltar" desenhada no topo;
+//   • cfgSeta    → seta do seletor de idioma (decorativa);
+//   • cfgToggle  → interruptor da linha "Notificações";
+//   • cfgMusica / cfgEfeitos → barras de volume (trilha + bolinha + %).
+const CFG_ART = {
+  cfgVoltar:  [  75,  65,  320, 305],
+  cfgSeta:    [3075, 1462,  120, 120],
+  cfgToggle:  [2928, 2158,  270, 132],
+  cfgMusica:  [3890, 1668, 2350, 135],
+  cfgEfeitos: [3890, 2242, 2350, 135],
+};
+function alignCfg(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const s=Math.max(vw/ART_W, vh/ART_H);           // escala do object-fit:cover
+  const ox=(vw-ART_W*s)/2, oy=(vh-ART_H*s)/2;     // sobra cortada, centralizada
+  for(const id in CFG_ART){
+    const el=document.getElementById(id); if(!el) continue;
+    const r=CFG_ART[id];
+    const x=ox+r[0]*s, y=oy+r[1]*s;
+    el.style.left=x+'px';        el.style.top=y+'px';
+    el.style.width=(r[2]*s)+'px'; el.style.height=(r[3]*s)+'px';
+    el.style.fontSize=(r[3]*s)+'px';    // tamanhos internos usam `em`
+    // Janela espelhada do Voltar: cola a cópia da arte no fundo (offset = -posição)
+    const m=el.querySelector('.mirror');
+    if(m){ m.style.left=(-x)+'px'; m.style.top=(-y)+'px'; }
+  }
+}
+window.addEventListener('resize', alignCfg);
+window.addEventListener('orientationchange', alignCfg);
+alignCfg();
+
+// Preferências do jogador (interruptor + volumes). Guardadas no aparelho
+// (localStorage): valem também sem login e não mexem no save das partidas.
+const CFG_KEY='fkw_prefs';
+const cfgPrefs = Object.assign(
+  { notificacoes:true, volumeMusica:70, volumeEfeitos:85 },
+  (()=>{ try{ return JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(_){ return {}; } })()
+);
+function cfgSave(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfgPrefs)); }catch(_){} }
+
+// Interruptor (linha "Notificações")
+const cfgToggle=document.getElementById('cfgToggle');
+function cfgPaintToggle(){
+  cfgToggle.classList.toggle('on', !!cfgPrefs.notificacoes);
+  cfgToggle.setAttribute('aria-checked', String(!!cfgPrefs.notificacoes));
+}
+cfgToggle.addEventListener('click', ()=>{ cfgPrefs.notificacoes=!cfgPrefs.notificacoes; cfgPaintToggle(); cfgSave(); });
+cfgPaintToggle();
+
+// Barras de volume: tocar/arrastar na barra move a bolinha e atualiza o %.
+// O pointer fica capturado na barra, então o arrasto segue o dedo mesmo
+// saindo dela (igual ao joystick do jogo).
+function cfgSlider(id, pref){
+  const el=document.getElementById(id);
+  const track=el.querySelector('.cfg-track'), fill=el.querySelector('.cfg-fill'),
+        knob=el.querySelector('.cfg-knobbar'), pct=el.querySelector('.cfg-pct');
+  const paint=v=>{ fill.style.width=v+'%'; knob.style.left=v+'%'; pct.textContent=v+'%'; };
+  paint(cfgPrefs[pref]);
+  let drag=false;
+  const setFrom=cx=>{ const r=track.getBoundingClientRect();
+    const v=Math.round(Math.max(0, Math.min(1,(cx-r.left)/r.width))*100);
+    cfgPrefs[pref]=v; paint(v); };
+  el.addEventListener('pointerdown', e=>{ drag=true;
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
+    setFrom(e.clientX); });
+  el.addEventListener('pointermove', e=>{ if(drag) setFrom(e.clientX); });
+  const solta=()=>{ if(!drag) return; drag=false; cfgSave(); };
+  el.addEventListener('pointerup', solta);
+  el.addEventListener('pointercancel', solta);
+}
+cfgSlider('cfgMusica','volumeMusica');
+cfgSlider('cfgEfeitos','volumeEfeitos');
+
+// Voltar (seta desenhada na arte, com o mesmo "pulinho" dos botões da home)
+popGo('cfgVoltar', ()=>{ show('title'); state.scene='title'; });
+
+// Aquecer o cache da arte das Configurações depois que a home carregou, para a
+// tela abrir sem "piscar" na primeira vez (o <img> dela é loading="lazy").
+setTimeout(()=>{ const i=new Image(); i.src='assets/fkw-settings.webp'; }, 2500);
 // "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de RANKING (placeholder por enquanto)
