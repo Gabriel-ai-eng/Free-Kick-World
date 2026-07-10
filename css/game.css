@@ -153,6 +153,40 @@
   #cfgSeta { pointer-events:none; display:flex; align-items:center; justify-content:center; }
   #cfgSeta svg { width:78%; height:78%; filter:drop-shadow(0 0 .05em rgba(47,155,255,.55)); }
 
+  /* ---- Perfil recriado em código (avatar + nome + nível) ----
+     A arte deixa o painel do perfil vazio; estes elementos reproduzem o que a
+     arte antiga trazia desenhado, nos MESMOS lugares/tamanhos (retângulos em
+     px da arte, projetados pelo alignCfg). Fonte Rajdhani, como o modelo. */
+  #cfgAvatar { pointer-events:none; border-radius:50%;
+    border:.017em solid #2f9bff;
+    background:radial-gradient(circle at 50% 36%, #14304e, #081525 72%);
+    box-shadow:0 0 .05em rgba(63,214,255,.75), 0 0 .12em rgba(47,155,255,.35),
+      inset 0 0 .06em rgba(0,0,0,.55);
+    display:flex; align-items:center; justify-content:center; }
+  #cfgAvatar .cfgp-silhueta { width:60%; height:60%; opacity:.9; }
+  #cfgAvatar .cfgp-cam { position:absolute; left:74.5%; top:69.5%;
+    width:23.4%; aspect-ratio:1; border-radius:50%;
+    background:#0c1930; border:.006em solid rgba(63,214,255,.6);
+    box-shadow:0 .008em .035em rgba(0,0,0,.65);
+    display:flex; align-items:center; justify-content:center; }
+  #cfgAvatar .cfgp-cam svg { width:60%; height:60%; }
+  #cfgNome { pointer-events:none; display:flex; align-items:center; gap:.18em;
+    font-family:'Rajdhani','Segoe UI',system-ui,sans-serif; font-weight:700;
+    color:#f2f6fa; line-height:1; letter-spacing:.03em; white-space:nowrap;
+    text-shadow:0 .015em .05em rgba(0,0,0,.7); }
+  #cfgNome .cfgp-lapis { width:.52em; height:.52em; flex-shrink:0; margin-left:.06em;
+    filter:drop-shadow(0 0 .06em rgba(47,155,255,.45)); }
+  #cfgNivel { pointer-events:none; background:#3fd6ff;
+    clip-path:polygon(8% 0, 100% 0, 100% 76%, 92% 100%, 0 100%, 0 24%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Rajdhani','Segoe UI',system-ui,sans-serif; font-weight:700; }
+  #cfgNivel::before { content:''; position:absolute; inset:.032em;
+    background:linear-gradient(180deg, #0b1e33, #081324);
+    clip-path:polygon(8% 0, 100% 0, 100% 76%, 92% 100%, 0 100%, 0 24%); }
+  #cfgNivel span { position:relative; color:#3fd6ff; font-size:.62em;
+    letter-spacing:.08em; line-height:1;
+    text-shadow:0 0 .35em rgba(63,214,255,.55); }
+
   /* Interruptor (linha "Notificações"): trilho azul aceso quando ligado,
      bolinha escura com aro claro — como no modelo. */
   #cfgToggle { border:.03em solid rgba(255,255,255,.22); cursor:pointer;
