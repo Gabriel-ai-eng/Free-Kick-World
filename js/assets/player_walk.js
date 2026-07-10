@@ -8,4 +8,6 @@
 A.walk = new Image();
 A.walk.src = 'assets/player_walk.webp?v=2';
 A.walk.onload = onPlayerSprite;
-const WALK_SH = { FW:365, FH:673, cols:10, rows:2, frames:18 };
+// CH = altura do personagem (px) no quadro neutro — normaliza o tamanho na
+// tela entre as folhas (ver render.js).
+const WALK_SH = { FW:365, FH:673, cols:10, rows:2, frames:18, CH:628 };

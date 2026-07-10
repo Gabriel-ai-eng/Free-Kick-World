@@ -27,6 +27,9 @@ function uvToScreen(u,v){
   const nx=lerp(tx,bx,v), ny=lerp(ty,by,v);
   return { x: img.dx + nx*img.dw, y: img.dy + ny*img.dh };
 }
-// escala do personagem conforme a profundidade (perto = maior)
-function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sprite em px
+// escala do personagem conforme a profundidade (perto = maior).
+// Valores reduzidos (eram 0.035/0.135) para o jogador ficar proporcional ao
+// campo, como numa transmissão real — antes ele tinha quase o raio do círculo
+// central de altura. É a altura do CORPO na tela (px); ver sheet.CH em render.js.
+function depthScale(v){ return lerp(0.020, 0.076, v) * img.dh; }
 

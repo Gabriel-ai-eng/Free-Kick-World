@@ -38,7 +38,8 @@ function kick(){
     const du=ball.u-player.u, dv=ball.v-player.v;
     kickBall = (Math.hypot(du, dv*1.4) < 0.20);
     if(kickBall){
-      const w = depthScale(player.v)*(KICK_SH.FW/KICK_SH.FH);
+      // mesma largura com que o quadro é DESENHADO (render.js normaliza por CH)
+      const w = depthScale(player.v)*(KICK_SH.FW/KICK_SH.CH);
       const fieldW = Math.abs(uvToScreen(1,player.v).x - uvToScreen(0,player.v).x) || 1;
       ball.u = player.u + player.face*KICK_FOOT_DX*w/fieldW;
       ball.v = player.v;
@@ -141,7 +142,7 @@ function update(dt){
     const sheet = player.running ? RUN_SH : WALK_SH;          // folha de corrida/caminhada
     const pf = uvToScreen(player.u, player.v);                // base = pés do jogador
     const charH = depthScale(player.v);
-    const charW = charH * (sheet.FW / sheet.FH);
+    const charW = charH * (sheet.FW / (sheet.CH||sheet.FH));   // largura DESENHADA (render.js)
     // fase do passo: 2 passadas (um pé de cada vez) por ciclo completo da folha
     const phase = (player.anim / sheet.frames) * 4 * Math.PI;
     const swing = Math.max(0, Math.sin(phase));              // avanço do pé da frente (0..1)

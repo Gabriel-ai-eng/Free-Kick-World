@@ -12,5 +12,9 @@ A.idle = new Image();
 // quadros) e um player_idle.webp antigo em cache, com a grade velha, desmontaria
 // o desenho. Ao trocar a arte, mude a folha E suba esse número junto.
 A.idle.src = 'assets/player_idle.webp?v=3';
-const IDLE_SH = { FW:140, FH:276, cols:10, rows:21, frames:202 };
+// CH = altura do PERSONAGEM (px) dentro do quadro, medida nos pixels opacos do
+// quadro neutro. Cada folha tem uma folga diferente ao redor do corpo, então
+// desenhar pelo quadro (FH) deixava o jogador maior/menor conforme a animação;
+// render.js usa CH para todas as folhas saírem do MESMO tamanho na tela.
+const IDLE_SH = { FW:140, FH:276, cols:10, rows:21, frames:202, CH:259 };
 const IDLE_MS = 40;   // ms por quadro (~8s de loop calmo e suave)

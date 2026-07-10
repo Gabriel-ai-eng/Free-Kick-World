@@ -92,11 +92,16 @@ function drawPlayer(){
   const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : idle ? IDLE_SH : (run ? RUN_SH : WALK_SH);
   const sprite = jumping ? A.jump : kicking ? A.kick : idle ? A.idle : (run ? A.runner : A.walk);
   const ss=cam.spriteScale||1;                    // contra-escala p/ manter o tamanho na tela
-  const h=depthScale(player.v)*ss, w=h*(sheet.FW/sheet.FH);
+  // hChar = altura do CORPO na tela (igual em todas as folhas). O QUADRO é
+  // desenhado FH/CH maior, compensando a folga transparente de cada arte —
+  // assim correndo, andando, pulando ou chutando o jogador tem o MESMO tamanho.
+  const hChar=depthScale(player.v)*ss;
+  const h=hChar*(sheet.FH/(sheet.CH||sheet.FH)), w=h*(sheet.FW/sheet.FH);
   const pz=player.z*ss;                            // altura do pulo acompanha a contra-escala
-  // sombra fica menor quanto mais alto está o pulo
-  const sj=1/(1+pz/Math.max(20,h*0.6));
-  shadow(p.x, p.y, w*0.42*sj);
+  // sombra fica menor quanto mais alto está o pulo; baseada na ALTURA do corpo
+  // (a largura do quadro varia por folha e fazia a sombra pular de tamanho)
+  const sj=1/(1+pz/Math.max(20,hChar*0.6));
+  shadow(p.x, p.y, hChar*0.23*sj);
   // quadro de animação
   // A folha de caminhada é um ciclo contínuo (18 quadros): andando, passamos por
   // TODOS em sequência (loop). Parado (sem a folha de idle) cai no quadro 0.
