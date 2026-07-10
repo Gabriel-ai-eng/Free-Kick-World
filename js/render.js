@@ -49,6 +49,10 @@ function render(){
   // estádio PROCEDURAL MODULAR (camadas estáticas blitadas do offscreen)
   Stadium.draw(ctx, img.dx, img.dy, img.dw, img.dh);
 
+  // gramado VIVO: vento + marcas de deformação onde jogador/bola passaram
+  // (js/turf.js) — desenhado sobre a grama e SOB o jogador/bola.
+  Turf.draw(ctx);
+
   if(inGame){
     // ordena por profundidade (v) p/ sobreposição correta
     const ents=[

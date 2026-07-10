@@ -36,7 +36,7 @@ const Stadium = {
     shadows:{ vignette:0.5, rim:0.45 },
     weather:{ type:'none', intensity:0.5 },   // 'none' | 'rain' | 'snow' | 'fog'
   },
-  cv:null, c:null, built:false, pitch:null, _w:{ parts:[], t:0 },
+  cv:null, c:null, built:false, pitch:null, _w:{ parts:[], t:0 }, _grassTex:null,
 
   uv(u,v){ const P=this.pitch;
     const tx=lerp(P.TL.x,P.TR.x,u), ty=lerp(P.TL.y,P.TR.y,u);
@@ -67,6 +67,76 @@ const Stadium = {
     this.built=true;
   },
   rebuild(){ this.built=false; this.build(); },
+
+  // ---- TEXTURA DE GRAMA PROCEDURAL (HD pixel art) ----
+  // Gerada UMA vez num canvas offscreen em "espaço do campo" (retângulo visto
+  // de cima; x=u, y=v) e depois fatiada em perspectiva pelo GrassTileMap — a
+  // MESMA técnica usada antes com a foto, então perspectiva, dimensões e
+  // marcações não mudam em nada. Por ser gerada pixel a pixel com ruído, não
+  // existe tile: nada se repete e não há costura possível.
+  //   • faixas de corte (mow stripes) verticais com transição SUAVE nas bordas,
+  //     na MESMA paleta de verdes do cfg (grass.light/grass.dark);
+  //   • manchas largas de tom (ruído bilinear em 2 escalas) quebram a
+  //     uniformidade como num gramado de verdade;
+  //   • grão vertical correlacionado (cada pixel herda do de cima) desenha o
+  //     "fio" das lâminas — milhares de folhas discretas, densas e macias;
+  //   • por cima, pontas iluminadas e sombras de 1px entre as lâminas dão a
+  //     profundidade (brilho sutil em cima, sombra embaixo).
+  _makeGrassTex(){
+    const g=this.cfg.grass;
+    const TW=1408, TH=576;
+    const cv=document.createElement('canvas'); cv.width=TW; cv.height=TH;
+    const c=cv.getContext('2d');
+    const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+    const light=hex(g.light), dark=hex(g.dark);
+    // ruído bilinear (grade de valores aleatórios interpolada): 2 escalas
+    const grid=(gw,gh)=>{ const a=new Float32Array((gw+1)*(gh+1));
+      for(let i=0;i<a.length;i++) a[i]=Math.random();
+      return (x,y)=>{ const fx=x*gw, fy=y*gh, ix=Math.min(gw-1,fx|0), iy=Math.min(gh-1,fy|0), tx=fx-ix, ty=fy-iy;
+        const o=iy*(gw+1)+ix, v0=a[o]+(a[o+1]-a[o])*tx, v1=a[o+gw+1]+(a[o+gw+2]-a[o+gw+1])*tx;
+        return v0+(v1-v0)*ty; }; };
+    const n1=grid(9,6), n2=grid(37,24);
+    // mistura claro/escuro por coluna (faixas de corte com borda suave)
+    const stripes=g.stripes||18, sw=0.16, mixCol=new Float32Array(TW);
+    for(let x=0;x<TW;x++){
+      const pos=x/TW*stripes, i=pos|0, f=pos-i;
+      const base=(i%2)?0:1, prev=((i+stripes-1)%2)?0:1, next=((i+1)%2)?0:1;
+      let m=base;
+      if(f<sw) m=prev+(base-prev)*(0.5+0.5*(f/sw));
+      else if(f>1-sw) m=base+(next-base)*(0.5*((f-(1-sw))/sw));
+      mixCol[x]=m;
+    }
+    const im=c.createImageData(TW,TH), d=im.data;
+    const noise=(g.noise==null)?0.5:g.noise;
+    // grão vertical: valor de cada coluna "escorre" para o pixel de baixo
+    const grain=new Float32Array(TW);
+    for(let x=0;x<TW;x++) grain[x]=Math.random()-0.5;
+    for(let y=0;y<TH;y++){
+      const v=y/TH;
+      for(let x=0;x<TW;x++){
+        grain[x]=grain[x]*0.62+(Math.random()-0.5)*0.38;
+        const u=x/TW, m=mixCol[x];
+        let r=dark[0]+(light[0]-dark[0])*m,
+            gg=dark[1]+(light[1]-dark[1])*m,
+            b=dark[2]+(light[2]-dark[2])*m;
+        const patch=(n1(u,v)-0.5)*0.14+(n2(u,v)-0.5)*0.10;   // manchas de tom
+        const blade=grain[x]*(0.20+0.30*noise);              // fio das lâminas
+        const k=1+patch+blade;
+        r*=k; gg*=k; b*=k;
+        const o=(y*TW+x)*4;
+        d[o]=r>255?255:r; d[o+1]=gg>255?255:gg; d[o+2]=b>255?255:b; d[o+3]=255;
+      }
+    }
+    c.putImageData(im,0,0);
+    // folhas discretas por cima: pontas claras (luz) e vãos escuros (sombra)
+    for(let i=0;i<9000;i++){
+      const x=(Math.random()*TW)|0, y=(Math.random()*TH)|0, tall=1+((Math.random()*2)|0);
+      if(Math.random()<0.55) c.fillStyle=`rgba(189,234,150,${0.10+Math.random()*0.18})`;
+      else                   c.fillStyle=`rgba(24,80,34,${0.10+Math.random()*0.16})`;
+      c.fillRect(x,y,1,tall);
+    }
+    return cv;
+  },
 
   // Público denso via ImageData (rápido e fino) — preenche região [y0,y1].
   _crowd(c, y0, y1){
@@ -161,35 +231,20 @@ const Stadium = {
     GrassTileMap(S,c){
       const g=S.cfg.grass; c.save(); S.pitchPath(c,0); c.clip();
       c.fillStyle=g.dark; c.fillRect(0,0,S.W,S.H);
-      const im = (typeof pitchImg!=='undefined') ? pitchImg : null;
-      if(im && im.complete && im.naturalWidth>0){
-        // ---- Gramado por FOTO (mapeada no trapézio do campo, com perspectiva) ----
-        // Faixas horizontais: cada faixa amostra a linha correspondente do campo
-        // verde da imagem e a estica para a largura do campo naquela profundidade.
-        const iw=im.naturalWidth, ih=im.naturalHeight, K=PITCH_IMG;
-        const sTopY=K.topY*ih, sBotY=K.botY*ih;
-        const sTopL=K.topL*iw, sTopR=K.topR*iw, sBotL=K.botL*iw, sBotR=K.botR*iw;
-        const N=72; c.imageSmoothingEnabled=true;
-        for(let i=0;i<N;i++){
-          const t0=i/N, t1=(i+1)/N, tm=(t0+t1)/2;
-          const sy0=lerp(sTopY,sBotY,t0), sy1=lerp(sTopY,sBotY,t1);
-          const sl=lerp(sTopL,sBotL,tm),  sr=lerp(sTopR,sBotR,tm);
-          const dL0=S.uv(0,t0), dR0=S.uv(1,t0), dL1=S.uv(0,t1);
-          const dx=dL0.x, dw=dR0.x-dL0.x, dy=dL0.y, dh=(dL1.y-dL0.y);
-          // -0.5/+1: leve sobreposição p/ não deixar costura entre as faixas
-          c.drawImage(im, sl, sy0, sr-sl, Math.max(1,sy1-sy0), dx, dy-0.5, dw, dh+1);
-        }
-      } else {
-        // ---- Fallback procedural (caso a foto não carregue) ----
-        const band=(u0,u1,v0,v1,col)=>{ const a=S.uv(u0,v0),b=S.uv(u1,v0),d=S.uv(u1,v1),e=S.uv(u0,v1);
-          c.fillStyle=col; c.beginPath(); c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d.x,d.y);c.lineTo(e.x,e.y);c.closePath();c.fill(); };
-        // faixas de corte (mow)
-        if(g.mow==='horizontal'){ for(let i=0;i<g.stripes;i++) if(i%2===0) band(0,1,i/g.stripes,(i+1)/g.stripes,g.light); }
-        else if(g.mow==='checker'){ for(let i=0;i<g.stripes;i++)for(let j=0;j<g.stripes;j++) if((i+j)%2===0) band(i/g.stripes,(i+1)/g.stripes,j/g.stripes,(j+1)/g.stripes,g.light); }
-        else { for(let i=0;i<g.stripes;i++) if(i%2===0) band(i/g.stripes,(i+1)/g.stripes,0,1,g.light); }
-        // variação de tiles (textura de grama) — pontinhos claros/escuros
-        if(g.noise>0){ for(let n=0;n<5000;n++){ const u=Math.random(),v=Math.random(),p=S.uv(u,v);
-          c.globalAlpha=Math.random()*g.noise*0.22; c.fillStyle=Math.random()<0.5?'#bdea96':'#236a2c'; c.fillRect(p.x,p.y,2,2); } c.globalAlpha=1; }
+      // ---- Gramado PROCEDURAL HD (textura gerada em _makeGrassTex) ----
+      // Fatiada no trapézio com a MESMA matemática de faixas usada antes com a
+      // foto: cada faixa horizontal da textura (espaço do campo, x=u / y=v) é
+      // esticada para a largura do campo naquela profundidade — perspectiva
+      // idêntica, zero costura (as faixas se sobrepõem 0.5px).
+      if(!S._grassTex) S._grassTex=S._makeGrassTex();
+      const tex=S._grassTex, tw=tex.width, th=tex.height;
+      const N=96; c.imageSmoothingEnabled=true;
+      for(let i=0;i<N;i++){
+        const t0=i/N, t1=(i+1)/N;
+        const sy0=t0*th, sy1=t1*th;
+        const dL0=S.uv(0,t0), dR0=S.uv(1,t0), dL1=S.uv(0,t1);
+        c.drawImage(tex, 0, sy0, tw, Math.max(1,sy1-sy0),
+                    dL0.x, dL0.y-0.5, dR0.x-dL0.x, (dL1.y-dL0.y)+1);
       }
       // poça de luz dos refletores
       const ctr=S.uv(0.5,0.5), lp=c.createRadialGradient(ctr.x,ctr.y,S.H*0.04,ctr.x,ctr.y,S.W*0.5);
