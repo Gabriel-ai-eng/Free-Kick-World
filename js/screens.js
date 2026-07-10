@@ -198,8 +198,8 @@ setupMenuWave({
   btnPersonaliza: ()=>toast('Personalização em breve 👕'),
   btnVoltar:      goHome,
 });
-justGo('btnEvento',     ()=>toast('Em breve'));
-popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
+// btnEvento ("O Chute de Ouro") e btnEstadio ("Estádio Urbano"): sem ação —
+// só decorativos por enquanto, não saltam nem mostram "Em breve".
 popGo('btnAmigos',      ()=>toast('Em breve'));
 popGo('btnSettings',    ()=>{ show('settings'); state.scene='settings'; });
 justGo('btnChat',       ()=>toast('Em breve'));
