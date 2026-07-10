@@ -278,9 +278,21 @@ cfgSlider('cfgEfeitos','volumeEfeitos');
 
 // Nome do jogador: editável, salvo no aparelho (como as demais preferências
 // acima). É o "nome de jogo" exibido aqui — não é o nome da conta do Alps.
+// O MESMO nome (e a MESMA foto, logo abaixo) aparece também no cartão de
+// perfil da tela inicial (fkwPerfil) — as duas telas refletem uma só fonte.
 const cfgNomeInput=document.getElementById('cfgNomeInput');
+const fkwNomeEl=document.getElementById('fkwNome');
+
+function aplicarNome(nome){
+  const exibido = (nome && nome.trim()) ? nome.trim() : 'FKW PLAYER';
+  if(fkwNomeEl) fkwNomeEl.textContent = exibido;
+}
+
 cfgNomeInput.value = cfgPrefs.nome || '';
-cfgNomeInput.addEventListener('input', ()=>{ cfgPrefs.nome=cfgNomeInput.value; cfgSave(); });
+aplicarNome(cfgPrefs.nome);
+cfgNomeInput.addEventListener('input', ()=>{
+  cfgPrefs.nome=cfgNomeInput.value; cfgSave(); aplicarNome(cfgPrefs.nome);
+});
 
 // ---------- Foto de perfil (Supabase — MESMA conta do AlpsPrime-OS/Armor) ----------
 // carregarFotoPerfil()/enviarFotoPerfil() vivem em persistence.js (onde o
@@ -290,13 +302,21 @@ const cfgSilhueta=document.getElementById('cfgSilhueta');
 const cfgFotoBtn=document.getElementById('cfgFotoBtn');
 const cfgFotoInput=document.getElementById('cfgFotoInput');
 const cfgFotoCarregando=document.getElementById('cfgFotoCarregando');
+const fkwFotoImg=document.getElementById('fkwFotoImg');
+const fkwSilhueta=document.getElementById('fkwSilhueta');
 
 // Chamada assim que a foto (se existir) chega do banco, e de novo após subir
-// uma nova — troca a silhueta padrão pela foto real.
+// uma nova — troca a silhueta padrão pela foto real nas DUAS telas
+// (Configurações e o cartão de perfil da tela inicial).
 function cfgSetFoto(url){
   cfgFotoImg.src = url;
   cfgFotoImg.style.display = '';
   cfgSilhueta.style.display = 'none';
+  if(fkwFotoImg){
+    fkwFotoImg.src = url;
+    fkwFotoImg.style.display = '';
+    if(fkwSilhueta) fkwSilhueta.style.display = 'none';
+  }
 }
 
 cfgFotoBtn.addEventListener('click', ()=>{ if(!cfgFotoBtn.disabled) cfgFotoInput.click(); });

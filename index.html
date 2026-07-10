@@ -93,10 +93,13 @@
          com a MESMA projeção cover dos botões. -->
     <div id="fkwPerfil" class="fkw-hud">
       <div class="fkw-avatar">
-        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="13" fill="#e8f2ff"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#e8f2ff" stroke-width="6" stroke-linecap="round"/></svg>
+        <!-- Mesmo nome/foto das Configurações (cfgPrefs.nome / Supabase
+             usuarios.profile_picture_url) — atualizados juntos, ver screens.js. -->
+        <img id="fkwFotoImg" alt="" style="display:none" draggable="false" />
+        <svg id="fkwSilhueta" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="13" fill="#e8f2ff"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#e8f2ff" stroke-width="6" stroke-linecap="round"/></svg>
       </div>
       <div class="fkw-perfil-info">
-        <div class="fkw-perfil-nome">FKW PLAYER</div>
+        <div id="fkwNome" class="fkw-perfil-nome">FKW PLAYER</div>
         <div class="fkw-perfil-nivel">NÍVEL 0</div>
         <div class="fkw-perfil-xp"><div class="fkw-perfil-xp-fill" style="width:0%"></div></div>
       </div>
@@ -142,12 +145,17 @@
          avatar com anel + ícone de foto, SEU NOME com lápis e selo de NÍVEL —
          mesmos lugares/tamanhos em que eram desenhados na arte antiga. -->
     <div id="cfgAvatar" class="cfg-el">
-      <!-- Foto real (Supabase, tabela `usuarios` — a MESMA conta/foto do
-           AlpsPrime-OS e do Projeto Armor): escondida até carregar; se o
-           jogador não tiver foto cadastrada, fica só a silhueta padrão. -->
-      <img id="cfgFotoImg" class="cfgp-foto" alt="" style="display:none" draggable="false" />
-      <svg id="cfgSilhueta" class="cfgp-silhueta" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="13" fill="#d9e8f7"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#d9e8f7" stroke-width="6" stroke-linecap="round"/></svg>
-      <div id="cfgFotoCarregando" class="cfgp-carregando" style="display:none"><span class="cfgp-spinner"></span></div>
+      <!-- Anel clipado em círculo (só a foto/silhueta ficam aqui dentro) — o
+           botão da câmera fica FORA deste wrapper, como um selo na borda,
+           para não cobrir o rosto da foto. -->
+      <div class="cfgp-ring">
+        <!-- Foto real (Supabase, tabela `usuarios` — a MESMA conta/foto do
+             AlpsPrime-OS e do Projeto Armor): escondida até carregar; se o
+             jogador não tiver foto cadastrada, fica só a silhueta padrão. -->
+        <img id="cfgFotoImg" class="cfgp-foto" alt="" style="display:none" draggable="false" />
+        <svg id="cfgSilhueta" class="cfgp-silhueta" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="13" fill="#d9e8f7"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#d9e8f7" stroke-width="6" stroke-linecap="round"/></svg>
+        <div id="cfgFotoCarregando" class="cfgp-carregando" style="display:none"><span class="cfgp-spinner"></span></div>
+      </div>
       <button id="cfgFotoBtn" type="button" class="cfgp-cam" aria-label="Trocar foto de perfil">
         <svg viewBox="0 0 24 24" fill="#29d1ff"><path d="M9.2 4.4L7.9 6.3H4.9A2.2 2.2 0 0 0 2.7 8.5v9.2a2.2 2.2 0 0 0 2.2 2.2h14.2a2.2 2.2 0 0 0 2.2-2.2V8.5a2.2 2.2 0 0 0-2.2-2.2h-3l-1.3-1.9a1.5 1.5 0 0 0-1.2-.6h-3.2a1.5 1.5 0 0 0-1.2.6zM12 17.4a4.3 4.3 0 1 1 0-8.6 4.3 4.3 0 0 1 0 8.6z"/><circle cx="12" cy="13.1" r="2.5" fill="#0c1930"/></svg>
       </button>

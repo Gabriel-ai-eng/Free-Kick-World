@@ -114,12 +114,13 @@
     background:linear-gradient(180deg, rgba(8,16,30,.62), rgba(4,9,18,.7));
     border:.08em solid rgba(255,255,255,.12);
     box-shadow:0 .2em .8em rgba(0,0,0,.45); }
-  .fkw-avatar { height:74%; aspect-ratio:1; flex-shrink:0; border-radius:50%;
+  .fkw-avatar { position:relative; height:74%; aspect-ratio:1; flex-shrink:0; border-radius:50%;
     background:radial-gradient(circle at 50% 38%, #1b3350, #08131f);
     border:.16em solid #f5c542;
     box-shadow:0 0 .55em rgba(245,197,66,.55), inset 0 0 .4em rgba(0,0,0,.6);
     display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .fkw-avatar svg { width:66%; height:66%; }
+  .fkw-avatar img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .fkw-perfil-info { flex:1; min-width:0; display:flex; flex-direction:column;
     justify-content:center; gap:.3em; text-align:left; }
   .fkw-perfil-nome { color:#fff; font-weight:700; font-size:1.5em;
@@ -162,8 +163,13 @@
     background:radial-gradient(circle at 50% 36%, #14304e, #081525 72%);
     box-shadow:0 0 .05em rgba(63,214,255,.75), 0 0 .12em rgba(47,155,255,.35),
       inset 0 0 .06em rgba(0,0,0,.55);
-    display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #cfgAvatar .cfgp-silhueta { width:60%; height:60%; opacity:.9; flex-shrink:0; }
+    display:flex; align-items:center; justify-content:center; }
+  /* Anel que clipa a foto/silhueta em círculo. Fica DENTRO de #cfgAvatar, que
+     NÃO clipa (sem overflow:hidden) — assim o selo da câmera consegue ficar
+     por fora da borda, em vez de cobrir a foto. */
+  .cfgp-ring { position:absolute; inset:0; border-radius:50%; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; }
+  .cfgp-ring .cfgp-silhueta { width:60%; height:60%; opacity:.9; flex-shrink:0; }
   .cfgp-foto { position:absolute; inset:0; width:100%; height:100%;
     object-fit:cover; border-radius:50%; }
   .cfgp-carregando { position:absolute; inset:0; border-radius:50%;
@@ -172,8 +178,10 @@
     border:.06em solid rgba(63,214,255,.3); border-top-color:#3fd6ff;
     animation:cfgGirar .7s linear infinite; }
   @keyframes cfgGirar { to { transform:rotate(360deg); } }
-  .cfgp-cam { position:absolute; left:74.5%; top:69.5%;
-    width:23.4%; aspect-ratio:1; border-radius:50%; z-index:2;
+  /* Selo da câmera: fica na BORDA do anel, pra fora — igual ao Projeto Armor
+     (right/bottom negativos) — não cobre o rosto na foto do usuário. */
+  .cfgp-cam { position:absolute; right:-3%; bottom:-3%;
+    width:28%; aspect-ratio:1; border-radius:50%; z-index:2;
     background:#0c1930; border:.006em solid rgba(63,214,255,.6);
     box-shadow:0 .008em .035em rgba(0,0,0,.65); padding:0;
     display:flex; align-items:center; justify-content:center;
