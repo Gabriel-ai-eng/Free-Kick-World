@@ -102,6 +102,42 @@
   #btnSettings    { left:96.5%; top:2%;   width:3.2%;  height:8%; border-radius:50%; }
   #btnChat        { left:88%;  top:85.5%; width:11%;   height:8.5%; }
 
+  /* ---- HUD sobre a arte da home: perfil + contadores de moeda/diamante ----
+     Elementos HTML de verdade (não estão na imagem). Ficam por cima da arte e
+     são posicionados/dimensionados por JS (alignHud), que também define o
+     font-size proporcional — por isso os tamanhos internos usam `em`. */
+  .fkw-hud { position:absolute; z-index:3; pointer-events:none;
+    font-family:'Segoe UI', system-ui, Arial, sans-serif; line-height:1; }
+
+  #fkwPerfil { display:flex; align-items:center; gap:.7em; box-sizing:border-box;
+    padding:0 .8em 0 .5em; border-radius:.9em;
+    background:linear-gradient(180deg, rgba(8,16,30,.62), rgba(4,9,18,.7));
+    border:.08em solid rgba(255,255,255,.12);
+    box-shadow:0 .2em .8em rgba(0,0,0,.45); }
+  .fkw-avatar { height:74%; aspect-ratio:1; flex-shrink:0; border-radius:50%;
+    background:radial-gradient(circle at 50% 38%, #1b3350, #08131f);
+    border:.16em solid #f5c542;
+    box-shadow:0 0 .55em rgba(245,197,66,.55), inset 0 0 .4em rgba(0,0,0,.6);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .fkw-avatar svg { width:66%; height:66%; }
+  .fkw-perfil-info { flex:1; min-width:0; display:flex; flex-direction:column;
+    justify-content:center; gap:.3em; text-align:left; }
+  .fkw-perfil-nome { color:#fff; font-weight:700; font-size:1.5em;
+    letter-spacing:.02em; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; text-shadow:0 .06em .12em rgba(0,0,0,.85); }
+  .fkw-perfil-nivel { color:#fcd34d; font-weight:700; font-size:1.05em;
+    letter-spacing:.06em; white-space:nowrap;
+    text-shadow:0 .06em .12em rgba(0,0,0,.85); }
+  .fkw-perfil-xp { height:.5em; border-radius:1em; overflow:hidden;
+    background:rgba(0,0,0,.5); box-shadow:inset 0 0 0 .07em rgba(255,255,255,.12); }
+  .fkw-perfil-xp-fill { height:100%; width:62%; border-radius:1em;
+    background:linear-gradient(90deg,#f59e0b,#fcd34d);
+    box-shadow:0 0 .45em rgba(252,211,77,.75); }
+
+  .fkw-count { display:flex; align-items:center; color:#fff; font-weight:700;
+    letter-spacing:.02em; white-space:nowrap;
+    text-shadow:0 .06em .16em rgba(0,0,0,.9); }
+
   /* Aviso rápido "em breve" para áreas ainda não implementadas */
   #toast { position:fixed; left:50%; bottom:8%; transform:translate(-50%,20px);
     z-index:30; padding:12px 22px; border-radius:999px; pointer-events:none;
