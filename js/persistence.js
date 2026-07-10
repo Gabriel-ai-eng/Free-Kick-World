@@ -140,6 +140,54 @@ function applyMatchSnapshot(s){
   state.paused = true;
 }
 
+// ---------- Foto de perfil (compartilhada com o AlpsPrime-OS / Projeto Armor) ----------
+// Mesma tabela `usuarios` (coluna profile_picture_url) e mesmo bucket de
+// Storage ("uploads", pasta avatars/<uid>/) que o Projeto Armor já usa — MESMA
+// conta, mesmo projeto Supabase. Se o jogador já tem foto lá, ela aparece
+// aqui também; trocar a foto por aqui atualiza para os outros apps também.
+async function carregarFotoPerfil(){
+  if(!sb || !gameUser) return null;
+  try{
+    const { data, error } = await sb.from('usuarios').select('profile_picture_url').eq('id', gameUser.id).maybeSingle();
+    if(error) throw error;
+    return (data && data.profile_picture_url) || null;
+  }catch(_){ return null; }
+}
+
+// Recorta em quadrado (centralizado) e comprime antes de subir — evita mandar
+// a foto de 12MB da câmera do celular direto pro Storage.
+const AVATAR_LADO = 400;
+async function prepararAvatar(file){
+  const bitmap = await createImageBitmap(file);
+  const lado = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width-lado)/2, sy = (bitmap.height-lado)/2;
+  const canvas = document.createElement('canvas');
+  canvas.width = AVATAR_LADO; canvas.height = AVATAR_LADO;
+  canvas.getContext('2d').drawImage(bitmap, sx, sy, lado, lado, 0, 0, AVATAR_LADO, AVATAR_LADO);
+  const blob = await new Promise(resolve=>canvas.toBlob(resolve, 'image/webp', 0.85));
+  if(!blob) throw new Error('falha ao comprimir imagem');
+  return blob;
+}
+
+// Envia a foto nova: comprime, sobe pro Storage e grava a URL em `usuarios`
+// (mesma política de RLS do Projeto Armor: só o dono da conta, com acesso
+// pago, pode gravar em avatars/<uid>/). Retorna a URL nova ou lança erro.
+async function enviarFotoPerfil(file){
+  if(!sb || !gameUser) throw new Error('sem sessão');
+  if(!file || !file.type || !file.type.startsWith('image/')) throw new Error('escolha um arquivo de imagem');
+  const blob = await prepararAvatar(file);
+  const caminho = `avatars/${gameUser.id}/avatar-${Date.now()}.webp`;
+  const { error: erroUpload } = await sb.storage.from('uploads').upload(caminho, blob, { contentType:'image/webp', upsert:true });
+  if(erroUpload) throw erroUpload;
+  const { data: pub } = sb.storage.from('uploads').getPublicUrl(caminho);
+  const url = pub && pub.publicUrl;
+  if(!url) throw new Error('falha ao obter URL pública');
+  const { error: erroSalvar } = await sb.from('usuarios')
+    .upsert({ id: gameUser.id, profile_picture_url: url, updated_date: new Date().toISOString() }, { onConflict:'id' });
+  if(erroSalvar) throw erroSalvar;
+  return url;
+}
+
 // Cria o cliente supabase uma única vez (necessário já na tela de login).
 function ensureClient(){
   if(sb) return sb;
@@ -158,7 +206,12 @@ async function initPersistence(){
     const { data } = await sb.auth.getUser();
     gameUser = (data && data.user) ? data.user : null;
     show('title'); state.scene='title';
-    if(gameUser){ await loadBest(); await loadState(); }
+    if(gameUser){
+      await loadBest(); await loadState();
+      // Busca à parte (não faz parte do `state` da partida) — não precisa
+      // esperar para a home aparecer; atualiza o avatar assim que chegar.
+      carregarFotoPerfil().then(url=>{ if(url && typeof cfgSetFoto==='function') cfgSetFoto(url); });
+    }
   }catch(_){ show('title'); state.scene='title'; } // offline: segue sem persistência
 }
 

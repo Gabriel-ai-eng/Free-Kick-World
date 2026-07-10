@@ -157,25 +157,39 @@
      A arte deixa o painel do perfil vazio; estes elementos reproduzem o que a
      arte antiga trazia desenhado, nos MESMOS lugares/tamanhos (retângulos em
      px da arte, projetados pelo alignCfg). Fonte Rajdhani, como o modelo. */
-  #cfgAvatar { pointer-events:none; border-radius:50%;
+  #cfgAvatar { border-radius:50%;
     border:.017em solid #2f9bff;
     background:radial-gradient(circle at 50% 36%, #14304e, #081525 72%);
     box-shadow:0 0 .05em rgba(63,214,255,.75), 0 0 .12em rgba(47,155,255,.35),
       inset 0 0 .06em rgba(0,0,0,.55);
-    display:flex; align-items:center; justify-content:center; }
-  #cfgAvatar .cfgp-silhueta { width:60%; height:60%; opacity:.9; }
-  #cfgAvatar .cfgp-cam { position:absolute; left:74.5%; top:69.5%;
-    width:23.4%; aspect-ratio:1; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfgAvatar .cfgp-silhueta { width:60%; height:60%; opacity:.9; flex-shrink:0; }
+  .cfgp-foto { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; border-radius:50%; }
+  .cfgp-carregando { position:absolute; inset:0; border-radius:50%;
+    background:rgba(4,12,20,.72); display:flex; align-items:center; justify-content:center; }
+  .cfgp-spinner { width:26%; aspect-ratio:1; border-radius:50%; display:inline-block;
+    border:.06em solid rgba(63,214,255,.3); border-top-color:#3fd6ff;
+    animation:cfgGirar .7s linear infinite; }
+  @keyframes cfgGirar { to { transform:rotate(360deg); } }
+  .cfgp-cam { position:absolute; left:74.5%; top:69.5%;
+    width:23.4%; aspect-ratio:1; border-radius:50%; z-index:2;
     background:#0c1930; border:.006em solid rgba(63,214,255,.6);
-    box-shadow:0 .008em .035em rgba(0,0,0,.65);
-    display:flex; align-items:center; justify-content:center; }
-  #cfgAvatar .cfgp-cam svg { width:60%; height:60%; }
-  #cfgNome { pointer-events:none; display:flex; align-items:center; gap:.18em;
-    font-family:'Rajdhani','Segoe UI',system-ui,sans-serif; font-weight:700;
-    color:#f2f6fa; line-height:1; letter-spacing:.03em; white-space:nowrap;
-    text-shadow:0 .015em .05em rgba(0,0,0,.7); }
+    box-shadow:0 .008em .035em rgba(0,0,0,.65); padding:0;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; touch-action:manipulation; }
+  .cfgp-cam:disabled { opacity:.55; cursor:default; }
+  .cfgp-cam svg { width:60%; height:60%; }
+  #cfgNome { display:flex; align-items:center; gap:.18em; }
+  #cfgNomeInput { flex:1; min-width:0; background:transparent; border:none; outline:none;
+    padding:0; margin:0; color:#f2f6fa;
+    font-family:'Rajdhani','Segoe UI',system-ui,sans-serif; font-weight:700; font-size:1em;
+    line-height:1; letter-spacing:.03em; text-transform:uppercase;
+    text-shadow:0 .015em .05em rgba(0,0,0,.7);
+    -webkit-user-select:text; user-select:text; touch-action:manipulation; }
+  #cfgNomeInput::placeholder { color:#f2f6fa; opacity:.95; }
   #cfgNome .cfgp-lapis { width:.52em; height:.52em; flex-shrink:0; margin-left:.06em;
-    filter:drop-shadow(0 0 .06em rgba(47,155,255,.45)); }
+    pointer-events:none; filter:drop-shadow(0 0 .06em rgba(47,155,255,.45)); }
   #cfgNivel { pointer-events:none; background:#3fd6ff;
     clip-path:polygon(8% 0, 100% 0, 100% 76%, 92% 100%, 0 100%, 0 24%);
     display:flex; align-items:center; justify-content:center;

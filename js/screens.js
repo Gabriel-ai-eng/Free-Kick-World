@@ -238,7 +238,7 @@ alignCfg();
 // (localStorage): valem também sem login e não mexem no save das partidas.
 const CFG_KEY='fkw_prefs';
 const cfgPrefs = Object.assign(
-  { notificacoes:true, volumeMusica:70, volumeEfeitos:85 },
+  { notificacoes:true, volumeMusica:70, volumeEfeitos:85, nome:'' },
   (()=>{ try{ return JSON.parse(localStorage.getItem(CFG_KEY))||{}; }catch(_){ return {}; } })()
 );
 function cfgSave(){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfgPrefs)); }catch(_){} }
@@ -275,6 +275,48 @@ function cfgSlider(id, pref){
 }
 cfgSlider('cfgMusica','volumeMusica');
 cfgSlider('cfgEfeitos','volumeEfeitos');
+
+// Nome do jogador: editável, salvo no aparelho (como as demais preferências
+// acima). É o "nome de jogo" exibido aqui — não é o nome da conta do Alps.
+const cfgNomeInput=document.getElementById('cfgNomeInput');
+cfgNomeInput.value = cfgPrefs.nome || '';
+cfgNomeInput.addEventListener('input', ()=>{ cfgPrefs.nome=cfgNomeInput.value; cfgSave(); });
+
+// ---------- Foto de perfil (Supabase — MESMA conta do AlpsPrime-OS/Armor) ----------
+// carregarFotoPerfil()/enviarFotoPerfil() vivem em persistence.js (onde o
+// cliente Supabase e o usuário logado já existem); aqui só a UI.
+const cfgFotoImg=document.getElementById('cfgFotoImg');
+const cfgSilhueta=document.getElementById('cfgSilhueta');
+const cfgFotoBtn=document.getElementById('cfgFotoBtn');
+const cfgFotoInput=document.getElementById('cfgFotoInput');
+const cfgFotoCarregando=document.getElementById('cfgFotoCarregando');
+
+// Chamada assim que a foto (se existir) chega do banco, e de novo após subir
+// uma nova — troca a silhueta padrão pela foto real.
+function cfgSetFoto(url){
+  cfgFotoImg.src = url;
+  cfgFotoImg.style.display = '';
+  cfgSilhueta.style.display = 'none';
+}
+
+cfgFotoBtn.addEventListener('click', ()=>{ if(!cfgFotoBtn.disabled) cfgFotoInput.click(); });
+
+cfgFotoInput.addEventListener('change', async ()=>{
+  const file = cfgFotoInput.files && cfgFotoInput.files[0];
+  cfgFotoInput.value='';   // permite escolher o mesmo arquivo de novo depois
+  if(!file) return;
+  cfgFotoBtn.disabled = true;
+  cfgFotoCarregando.style.display = 'flex';
+  try{
+    const url = await enviarFotoPerfil(file);
+    cfgSetFoto(url);
+  }catch(_){
+    toast('Não deu pra enviar a foto. Tenta de novo.');
+  }finally{
+    cfgFotoCarregando.style.display = 'none';
+    cfgFotoBtn.disabled = false;
+  }
+});
 
 // Voltar (seta desenhada na arte, com o mesmo "pulinho" dos botões da home)
 popGo('cfgVoltar', ()=>{ show('title'); state.scene='title'; });
@@ -314,7 +356,16 @@ try { screen.orientation.addEventListener('change', autoTelaCheiaPaisagem); } ca
 // cheia a partir de um toque. Quando a rotação não conta como gesto, o
 // requestFullscreen automático acima falha em silêncio — então o primeiro toque
 // na tela (em paisagem) entra em tela cheia. O toque em qualquer lugar serve.
-document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
+// EXCEÇÃO: o botão da câmera (trocar foto de perfil) também depende desse
+// MESMO toque para abrir o seletor de arquivo nativo — e o navegador só deixa
+// uma dessas ações "gastar" o gesto por vez. Pedir tela cheia aqui bloquearia
+// o seletor em silêncio; por isso pulamos a tela cheia nesse botão específico
+// (o próximo toque em qualquer outro lugar já entra em tela cheia normalmente).
+document.addEventListener('pointerdown', (e)=>{
+  if(isPortrait() || isFullscreen()) return;
+  if(e.target.closest('#cfgFotoBtn')) return;
+  goFullscreen();
+});
 
 // Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
 function goFullscreen(){
