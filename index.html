@@ -31,6 +31,15 @@
 <body>
 <canvas id="cv"></canvas>
 
+<!-- Capa opaca de carregamento: o canvas já desenha o estádio PROCEDURAL em
+     TODO frame (mesmo fora de partida, p/ dar profundidade atrás das telas
+     translúcidas de FIM/RANKING) — sem isso, ele "vaza" por baixo enquanto
+     as telas ficam escondidas esperando a sessão (show(null) em
+     persistence.js), o que dava um flash do estádio ao virar o celular antes
+     da arte da tela inicial aparecer. Fica visível até a PRIMEIRA tela real
+     ser exibida (show() em screens.js já esconde sozinha, uma única vez). -->
+<div id="bootCover"></div>
+
 <!-- Voltar para a Home -->
 <button id="backBtn">← Voltar</button>
 

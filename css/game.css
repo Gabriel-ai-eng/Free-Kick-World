@@ -6,6 +6,11 @@
   html,body { width:100%; height:100%; background:#05080f; overflow:hidden;
     font-family:'Courier New', ui-monospace, monospace; color:#e2e8f0; }
   #cv { position:fixed; inset:0; width:100%; height:100%; display:block; background:#05080f; }
+  /* Capa de carregamento: cobre o canvas (que já desenha o estádio em TODO
+     frame) até a primeira tela real aparecer — ver comentário no index.html.
+     Abaixo do "vire o celular" (z-index 50: continua avisando em retrato),
+     acima das telas (z-index 20) e do canvas. */
+  #bootCover { position:fixed; inset:0; z-index:30; background:#05080f; }
 
   /* ---------- Telas (menus) ---------- */
   .screen { position:fixed; inset:0; display:flex; flex-direction:column;

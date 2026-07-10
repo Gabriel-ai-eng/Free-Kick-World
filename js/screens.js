@@ -39,13 +39,18 @@ document.addEventListener('contextmenu', e=>e.preventDefault());
 const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela'),settings:document.getElementById('scrSettings')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 const backBtn=document.getElementById('backBtn');
+const bootCover=document.getElementById('bootCover');
 if(backBtn) backBtn.style.display='none';   // a HOME é a 1ª tela; show() cuida do resto
 // Mostra a tela pedida (esconde as outras). Na HOME o próprio menu tem o botão
 // VOLTAR, então escondemos o "← Voltar" do topo para não sobrepor a arte.
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden');
   // Sem o "← Voltar" do topo na HOME (o menu tem o próprio VOLTAR) e nas
   // CONFIGURAÇÕES (a arte já tem a seta de voltar, com hotspot próprio).
-  if(backBtn) backBtn.style.display = (n==='title'||n==='settings') ? 'none' : ''; }
+  if(backBtn) backBtn.style.display = (n==='title'||n==='settings') ? 'none' : '';
+  // Some para sempre assim que a PRIMEIRA tela real é exibida (n é uma tela
+  // de verdade, não o show(null) que só esconde tudo enquanto a sessão ainda
+  // está carregando — ver comentário no index.html/#bootCover).
+  if(n && bootCover) bootCover.classList.add('hidden'); }
 
 // ---------- AUTOALINHAMENTO DOS BOTÕES COM ARTE PRÓPRIA (btnimg) ----------
 // O fundo (#titleImg) usa object-fit:cover; quando a tela não tem a proporção
