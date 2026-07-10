@@ -50,6 +50,7 @@
      proporção de tela. O offset é o negativo da posição (left/top) do hotspot. */
   #btnEvento      .mirror { left:-75.8vw;  top:-16vh; }
   #btnEstadio     .mirror { left:-75.8vw;  top:-46.5vh; }
+  #btnAmigos      .mirror { left:-91.5vw;  top:-2vh; }
   #btnSettings    .mirror { left:-96.5vw;  top:-2vh; }
   #btnChat        .mirror { left:-88vw;    top:-85.5vh; }
   /* Pop do clique: o botão salta e aumenta um pouco, depois assenta de volta. */
@@ -98,7 +99,8 @@
   #btnEvento      { left:75.8%;  top:16%;    width:22.4%;  height:27%; }
   #btnEstadio     { left:75.8%;  top:46.5%;  width:22.4%;  height:22%; }
   #startQuick     { left:76.95%; top:69.31%; width:17.70%; height:13.10%; }
-  /* Topo (engrenagem) e rodapé (chat) */
+  /* Topo (silhuetas/amigos + engrenagem) e rodapé (chat) */
+  #btnAmigos      { left:91.5%; top:2%;   width:3.2%;  height:8%; border-radius:50%; }
   #btnSettings    { left:96.5%; top:2%;   width:3.2%;  height:8%; border-radius:50%; }
   #btnChat        { left:88%;  top:85.5%; width:11%;   height:8.5%; }
 
