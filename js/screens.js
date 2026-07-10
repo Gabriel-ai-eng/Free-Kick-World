@@ -59,7 +59,7 @@ const BTN_ART = {                       // [x, y, w, h] em px da arte
   btnPersonaliza: [ 320.0, 1564.3, 1360.0, 299.6],
   btnRanking:     [ 320.0, 1881.2, 1360.0, 299.6],
   btnVoltar:      [ 320.0, 2233.6, 1360.0, 302.8],
-  startQuick:     [4924.8, 2012.0, 1132.8, 379.9],
+  startQuick:     [4924.8, 2014.0, 1132.8, 379.9],
 };
 function alignBtnArt(){
   const vw=window.innerWidth, vh=window.innerHeight;
