@@ -166,15 +166,13 @@
       <input id="cfgNomeInput" type="text" placeholder="SEU NOME" maxlength="18" autocomplete="off" spellcheck="false" />
       <svg class="cfgp-lapis" viewBox="0 0 24 24" aria-hidden="true"><path fill="#8fe1ff" d="M16.2 2.9l1.5-1.5a2 2 0 0 1 2.8 0l2.1 2.1a2 2 0 0 1 0 2.8l-1.5 1.5-4.9-4.9z"/><path fill="#2f9bff" d="M14.9 4.2l4.9 4.9L8.9 20 2.5 21.5 4 15.1 14.9 4.2z"/></svg>
     </div>
-    <div id="cfgNivel" class="cfg-el"><span>NÍVEL 25</span></div>
+    <!-- Nível: MESMO valor do cartão de perfil da home (fkwPerfil) — as duas
+         telas refletem uma só fonte (aplicarNivel em screens.js). -->
+    <div id="cfgNivel" class="cfg-el"><span>NÍVEL 0</span></div>
     <!-- E-mail da conta: a arte v3 deixa a linha vazia (só rótulo e cadeado);
          o valor é o e-mail REAL da sessão logada no Alps OS (mesma conta do
          Supabase — gameUser em persistence.js), preenchido por JS. -->
     <div id="cfgEmail" class="cfg-el"><span id="cfgEmailTexto"></span></div>
-    <!-- Seta do seletor de idioma (decorativa, como no modelo) -->
-    <div id="cfgSeta" class="cfg-el" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#2f9bff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>
-    </div>
     <!-- Interruptor da linha "Notificações" -->
     <button id="cfgToggle" class="cfg-el on" role="switch" aria-checked="true" aria-label="Notificações"><span class="cfg-knob"></span></button>
     <!-- Barras de volume (trilha + bolinha + %) dentro dos cartões da arte -->

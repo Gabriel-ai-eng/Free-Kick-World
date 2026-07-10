@@ -208,7 +208,6 @@ justGo('btnChat',       ()=>toast('Em breve'));
 //   • cfgVoltar  → hotspot sobre a seta "voltar" desenhada no topo;
 //   • cfgAvatar / cfgNome / cfgNivel → perfil recriado em código (a arte v2
 //     deixa o painel vazio); mesmos lugares da arte antiga;
-//   • cfgSeta    → seta do seletor de idioma (decorativa);
 //   • cfgToggle  → interruptor da linha "Notificações";
 //   • cfgMusica / cfgEfeitos → barras de volume (trilha + bolinha + %).
 const CFG_ART = {
@@ -217,7 +216,6 @@ const CFG_ART = {
   cfgNome:    [1526,  648, 1150, 190],
   cfgNivel:   [1526,  904,  510, 166],
   cfgEmail:   [1460, 1807, 1600, 130],
-  cfgSeta:    [3075, 1462,  120, 120],
   cfgToggle:  [2928, 2158,  270, 132],
   cfgMusica:  [3890, 1668, 2350, 135],
   cfgEfeitos: [3890, 2242, 2350, 135],
@@ -301,6 +299,19 @@ aplicarNome(cfgPrefs.nome);
 cfgNomeInput.addEventListener('input', ()=>{
   cfgPrefs.nome=cfgNomeInput.value; cfgSave(); aplicarNome(cfgPrefs.nome);
 });
+
+// Nível do jogador: ainda não existe progressão real (sem XP), então é 0 nas
+// DUAS telas — mesma fonte única, para não ficarem dessincronizadas quando a
+// progressão de verdade for implementada.
+const NIVEL_JOGADOR = 0;
+const cfgNivelSpan=document.querySelector('#cfgNivel span');
+const fkwNivelEl=document.querySelector('.fkw-perfil-nivel');
+function aplicarNivel(n){
+  const texto = `NÍVEL ${n}`;
+  if(cfgNivelSpan) cfgNivelSpan.textContent = texto;
+  if(fkwNivelEl) fkwNivelEl.textContent = texto;
+}
+aplicarNivel(NIVEL_JOGADOR);
 
 // E-mail da conta: MESMO e-mail com que o jogador entrou no Alps OS (sessão
 // do Supabase reaproveitada — ver gameUser em persistence.js). Chamado assim
