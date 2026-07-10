@@ -76,6 +76,33 @@ window.addEventListener('resize', alignBtnArt);
 window.addEventListener('orientationchange', alignBtnArt);
 alignBtnArt();
 
+// ---- HUD sobre a arte: perfil (topo-esq) + números de moeda/diamante ----
+// Mesma projeção cover dos botões. Os retângulos estão em px da arte 6400×2900:
+//   • fkwPerfil: faixa de céu livre acima do logo FKW.
+//   • fkwMoedas/fkwGemas: na folga entre o ícone (já desenhado na arte) e o "+".
+// O font-size é proporcional à altura projetada (o conteúdo interno usa `em`).
+const HUD_ART = {
+  fkwPerfil: [  75,  22, 1430, 288],
+  fkwMoedas: [4150,  66,  520, 188],
+  fkwGemas:  [5025,  66,  560, 188],
+};
+function alignHud(){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const s=Math.max(vw/ART_W, vh/ART_H);
+  const ox=(vw-ART_W*s)/2, oy=(vh-ART_H*s)/2;
+  for(const id in HUD_ART){
+    const el=document.getElementById(id); if(!el) continue;
+    const r=HUD_ART[id];
+    el.style.left =(ox+r[0]*s)+'px'; el.style.top   =(oy+r[1]*s)+'px';
+    el.style.width=(r[2]*s)+'px';    el.style.height=(r[3]*s)+'px';
+    const h=r[3]*s;
+    el.style.fontSize=(id==='fkwPerfil' ? h*0.2 : h*0.55)+'px';
+  }
+}
+window.addEventListener('resize', alignHud);
+window.addEventListener('orientationchange', alignHud);
+alignHud();
+
 // Toast rápido "em breve" para as áreas ainda não implementadas.
 const toastEl=document.getElementById('toast'); let toastId=null;
 function toast(t){ if(!toastEl) return; toastEl.textContent=t; toastEl.classList.add('on');

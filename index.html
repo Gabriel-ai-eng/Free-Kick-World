@@ -78,6 +78,23 @@
     <!-- Topo / rodapé -->
     <button class="hotspot" id="btnSettings"    aria-label="Configurações"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnChat"        aria-label="Chat"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+
+    <!-- HUD sobre a arte (não faz parte da imagem): retângulo de perfil no
+         topo-esquerdo e os números de moeda/diamante ao lado dos ícones que já
+         estão desenhados na arte. Posicionados por JS (alignHud em screens.js),
+         com a MESMA projeção cover dos botões. -->
+    <div id="fkwPerfil" class="fkw-hud">
+      <div class="fkw-avatar">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="24" r="13" fill="#e8f2ff"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#e8f2ff" stroke-width="6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="fkw-perfil-info">
+        <div class="fkw-perfil-nome">FKW PLAYER</div>
+        <div class="fkw-perfil-nivel">NÍVEL 12</div>
+        <div class="fkw-perfil-xp"><div class="fkw-perfil-xp-fill"></div></div>
+      </div>
+    </div>
+    <div id="fkwMoedas" class="fkw-hud fkw-count">12.450</div>
+    <div id="fkwGemas"  class="fkw-hud fkw-count">1.250</div>
   </div>
   <!-- Aviso rápido "em breve" para as áreas ainda não implementadas -->
   <div id="toast"></div>
