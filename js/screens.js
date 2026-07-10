@@ -117,6 +117,12 @@ function popGo(id, fn){
   const el=document.getElementById(id); if(!el) return;
   el.onclick=()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(fn,170); };
 }
+// Clique SEM pulo: só roda a ação (usado nos botões ainda não implementados
+// que não devem saltar ao serem tocados).
+function justGo(id, fn){
+  const el=document.getElementById(id); if(!el) return;
+  el.onclick=fn;
+}
 
 // ---------- ONDA / EFEITO PIANO DOS BOTÕES DO MENU (igual ao Projeto Armor) ----------
 // Segurar e deslizar o dedo pelos botões da tela inicial cria uma "onda": cada
@@ -187,10 +193,11 @@ setupMenuWave({
   btnPersonaliza: ()=>toast('Personalização em breve 👕'),
   btnVoltar:      goHome,
 });
-popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
+justGo('btnEvento',     ()=>toast('Em breve'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
+popGo('btnAmigos',      ()=>toast('Em breve'));
 popGo('btnSettings',    ()=>{ show('settings'); state.scene='settings'; });
-popGo('btnChat',        ()=>toast('Chat em breve 💬'));
+justGo('btnChat',       ()=>toast('Em breve'));
 
 // =========================================================================
 //  CONFIGURAÇÕES — arte própria (fkw-settings.webp) + controles reais
