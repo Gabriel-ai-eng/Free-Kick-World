@@ -117,6 +117,37 @@
   <button class="btn ghost" id="tabelaBack">VOLTAR</button>
 </div>
 
+<!-- CONFIGURAÇÕES (arte cheia + controles reais por cima) -->
+<!-- A arte fkw-settings.webp (6400×2900, mesma proporção da home) já traz
+     desenhados o cabeçalho, o perfil (SEU NOME / NÍVEL), as linhas Idioma /
+     E-mail / Notificações e os dois cartões de volume. O que é INTERATIVO é
+     HTML de verdade sobreposto, posicionado por JS (alignCfg em screens.js)
+     com a MESMA projeção cover dos botões da home: a seta do seletor de
+     idioma, o interruptor de Notificações e as duas barras de volume. -->
+<div id="scrSettings" class="screen hidden">
+  <div id="cfgWrap">
+    <img id="cfgImg" src="assets/fkw-settings.webp" alt="Configurações" loading="lazy" decoding="async" draggable="false" />
+    <!-- Voltar: hotspot sobre a seta desenhada na arte (janela espelhada,
+         igual aos cartões da home — parada é invisível; salta no .pop) -->
+    <button class="hotspot" id="cfgVoltar" aria-label="Voltar"><img class="mirror" src="assets/fkw-settings.webp" alt="" draggable="false" /></button>
+    <!-- Seta do seletor de idioma (decorativa, como no modelo) -->
+    <div id="cfgSeta" class="cfg-el" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2f9bff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>
+    </div>
+    <!-- Interruptor da linha "Notificações" -->
+    <button id="cfgToggle" class="cfg-el on" role="switch" aria-checked="true" aria-label="Notificações"><span class="cfg-knob"></span></button>
+    <!-- Barras de volume (trilha + bolinha + %) dentro dos cartões da arte -->
+    <div id="cfgMusica" class="cfg-el cfg-slider">
+      <div class="cfg-track"><div class="cfg-fill"></div><div class="cfg-knobbar"></div></div>
+      <span class="cfg-pct">70%</span>
+    </div>
+    <div id="cfgEfeitos" class="cfg-el cfg-slider">
+      <div class="cfg-track"><div class="cfg-fill"></div><div class="cfg-knobbar"></div></div>
+      <span class="cfg-pct">85%</span>
+    </div>
+  </div>
+</div>
+
 <!-- Config do Supabase (gerada pelo Vite a partir das env do app) + cliente supabase-js -->
 <script src="supabase-config.js"></script>
 <script src="vendor/supabase.min.js"></script>

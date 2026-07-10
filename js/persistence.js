@@ -53,9 +53,10 @@ function scheduleSave(){
 }
 
 async function saveNow(){
-  // Na tela inicial sem partida pausada em memória não há nada novo a salvar —
-  // e escrever aqui sobrescreveria o save (ainda não retomado) daquele jogo.
-  if(state.scene==='title' && !state.paused) return;
+  // Na tela inicial (ou nas Configurações) sem partida pausada em memória não
+  // há nada novo a salvar — e escrever aqui sobrescreveria o save (ainda não
+  // retomado) daquele jogo.
+  if((state.scene==='title'||state.scene==='settings') && !state.paused) return;
   const mode=modeKey(state.mode);
   const snap=snapshot();
   savedGames[mode]=snap;               // memória primeiro: vale mesmo sem login
