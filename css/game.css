@@ -24,7 +24,7 @@
     object-position: center;
 }
   /* Áreas clicáveis transparentes sobre os botões desenhados na arte.
-     Posições em % casam com os botões pintados na imagem fkw-title.jpg
+     Posições em % casam com os botões pintados na imagem fkw-title.webp
      (proporção 6400×2900). Um leve realce ao tocar dá retorno visual. */
   .hotspot { position:absolute; background:transparent; border:none; padding:0; margin:0;
     cursor:pointer; border-radius:12px; -webkit-tap-highlight-color:transparent;
@@ -210,6 +210,16 @@
   #cfgNivel span { position:relative; color:#3fd6ff; font-size:.62em;
     letter-spacing:.08em; line-height:1;
     text-shadow:0 0 .35em rgba(63,214,255,.55); }
+
+  /* E-mail da conta: valor real (sessão do Alps OS), no lugar em que a arte
+     antiga trazia o placeholder "seuemail@exemplo.com" — mesma fonte/lugar,
+     alinhado à direita (encostado no cadeado) e sem quebrar linha. */
+  #cfgEmail { pointer-events:none; display:flex; align-items:center;
+    justify-content:flex-end; overflow:hidden; }
+  #cfgEmail span { color:#eef6ff; font-weight:600; font-size:.58em; line-height:1;
+    font-family:'Segoe UI', system-ui, Arial, sans-serif; letter-spacing:.01em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    text-shadow:0 .02em .06em rgba(0,0,0,.7); }
 
   /* Interruptor (linha "Notificações"): trilho azul aceso quando ligado,
      bolinha escura com aro claro — como no modelo. */

@@ -7,7 +7,7 @@
 // Nesse arquivo fica: ONDE a imagem é carregada, ONDE ela se posiciona e QUAL o
 // tamanho dos quadros. O DESENHO em si (como a grama e os gols são pintados no
 // campo) continua em js/stadium.js; o desenho do jogador em js/render.js.
-// (A arte da tela inicial, assets/fkw-title.jpg, é uma <img> direta no
+// (A arte da tela inicial, assets/fkw-title.webp, é uma <img> direta no
 //  index.html, então não tem arquivo de código aqui.)
 // =========================================================================
 

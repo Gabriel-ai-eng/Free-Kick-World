@@ -19,7 +19,7 @@ autônoma: abra o `index.html` em qualquer servidor HTTP (mesma origem) e jogue.
     - `_loader.js` — infra compartilhada (contador de carga, âncoras dos gols).
     - `player_walk.js`, `player_run.js`, `player_kick.js`, `player_jump.js` — sprites.
     - `pitch-grass.js` — o gramado. `goal-left.js`, `goal-right.js` — as traves.
-    - (a arte `fkw-title.jpg` é uma `<img>` direta no `index.html`.)
+    - (a arte `fkw-title.webp` é uma `<img>` direta no `index.html`.)
   - `field.js` — geometria do campo em perspectiva, escala por profundidade.
   - `stadium.js` — estádio procedural (céu, arquibancada, público, grama, luzes).
   - `state.js` — estado da partida, jogador, bola, gol e chute.

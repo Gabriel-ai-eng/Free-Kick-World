@@ -216,6 +216,7 @@ const CFG_ART = {
   cfgAvatar:  [ 520,  466,  838, 838],
   cfgNome:    [1526,  648, 1150, 190],
   cfgNivel:   [1526,  904,  510, 166],
+  cfgEmail:   [1460, 1807, 1600, 130],
   cfgSeta:    [3075, 1462,  120, 120],
   cfgToggle:  [2928, 2158,  270, 132],
   cfgMusica:  [3890, 1668, 2350, 135],
@@ -301,6 +302,15 @@ cfgNomeInput.addEventListener('input', ()=>{
   cfgPrefs.nome=cfgNomeInput.value; cfgSave(); aplicarNome(cfgPrefs.nome);
 });
 
+// E-mail da conta: MESMO e-mail com que o jogador entrou no Alps OS (sessão
+// do Supabase reaproveitada — ver gameUser em persistence.js). Chamado assim
+// que a sessão é lida; sem login, a linha fica em branco (como a arte já
+// prevê, já que ninguém pode editar/ver esse valor mesmo).
+const cfgEmailEl=document.getElementById('cfgEmailTexto');
+function cfgSetEmail(email){
+  if(cfgEmailEl) cfgEmailEl.textContent = email || '';
+}
+
 // ---------- Foto de perfil (Supabase — MESMA conta do AlpsPrime-OS/Armor) ----------
 // carregarFotoPerfil()/enviarFotoPerfil() vivem em persistence.js (onde o
 // cliente Supabase e o usuário logado já existem); aqui só a UI.
@@ -337,6 +347,7 @@ cfgFotoInput.addEventListener('change', async ()=>{
   try{
     const url = await enviarFotoPerfil(file);
     cfgSetFoto(url);
+    if(typeof avatarCacheSet==='function') avatarCacheSet(url);
   }catch(_){
     toast('Não deu pra enviar a foto. Tenta de novo.');
   }finally{
@@ -350,7 +361,7 @@ popGo('cfgVoltar', ()=>{ show('title'); state.scene='title'; });
 
 // Aquecer o cache da arte das Configurações depois que a home carregou, para a
 // tela abrir sem "piscar" na primeira vez (o <img> dela é loading="lazy").
-setTimeout(()=>{ const i=new Image(); i.src='assets/fkw-settings.webp?v=2'; }, 2500);
+setTimeout(()=>{ const i=new Image(); i.src='assets/fkw-settings.webp?v=3'; }, 2500);
 // "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de RANKING (placeholder por enquanto)

@@ -140,6 +140,20 @@ function applyMatchSnapshot(s){
   state.paused = true;
 }
 
+// ---------- Cache local da foto (aparece na hora, sem esperar a consulta) ----------
+// A URL da última foto vista fica guardada no aparelho: assim que o jogo abre,
+// ela já é aplicada (cfgSetFoto), antes mesmo da sessão/consulta ao Supabase
+// responderem — corrige sozinha depois se a foto real for outra. Puramente
+// cosmético (evita a silhueta piscar antes da foto de verdade chegar); quem
+// manda é sempre o banco.
+const AVATAR_CACHE_KEY = 'fkw_avatar_url';
+function avatarCacheGet(){ try{ return localStorage.getItem(AVATAR_CACHE_KEY) || null; }catch(_){ return null; } }
+function avatarCacheSet(url){ try{ if(url) localStorage.setItem(AVATAR_CACHE_KEY, url); }catch(_){} }
+(function(){
+  const cached = avatarCacheGet();
+  if(cached && typeof cfgSetFoto==='function') cfgSetFoto(cached);
+})();
+
 // ---------- Foto de perfil (compartilhada com o AlpsPrime-OS / Projeto Armor) ----------
 // Mesma tabela `usuarios` (coluna profile_picture_url) e mesmo bucket de
 // Storage ("uploads", pasta avatars/<uid>/) que o Projeto Armor já usa — MESMA
@@ -208,9 +222,15 @@ async function initPersistence(){
     show('title'); state.scene='title';
     if(gameUser){
       await loadBest(); await loadState();
+      // E-mail da conta (mesmo login do Alps OS): já vem no user da sessão,
+      // sem precisar de outra consulta.
+      if(typeof cfgSetEmail==='function') cfgSetEmail(gameUser.email);
       // Busca à parte (não faz parte do `state` da partida) — não precisa
-      // esperar para a home aparecer; atualiza o avatar assim que chegar.
-      carregarFotoPerfil().then(url=>{ if(url && typeof cfgSetFoto==='function') cfgSetFoto(url); });
+      // esperar para a home aparecer; atualiza o avatar assim que chegar (e
+      // guarda no cache local para aparecer na hora na PRÓXIMA entrada).
+      carregarFotoPerfil().then(url=>{
+        if(url && typeof cfgSetFoto==='function'){ cfgSetFoto(url); avatarCacheSet(url); }
+      });
     }
   }catch(_){ show('title'); state.scene='title'; } // offline: segue sem persistência
 }
