@@ -19,6 +19,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Free Kick World ⚽</title>
 <link rel="stylesheet" href="css/game.css" />
+<!-- Fonte Rajdhani (mesma do Projeto Armor): usada no perfil recriado em código
+     dentro das Configurações (SEU NOME / NÍVEL). Carregada SEM BLOQUEAR — o
+     truque media="print" + onload aplica a fonte só quando ela chegar; até lá
+     o texto usa a fonte padrão (display=swap). -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap"
+      rel="stylesheet" media="print" onload="this.media='all'" />
 </head>
 <body>
 <canvas id="cv"></canvas>
@@ -126,10 +134,24 @@
      idioma, o interruptor de Notificações e as duas barras de volume. -->
 <div id="scrSettings" class="screen hidden">
   <div id="cfgWrap">
-    <img id="cfgImg" src="assets/fkw-settings.webp" alt="Configurações" loading="lazy" decoding="async" draggable="false" />
+    <img id="cfgImg" src="assets/fkw-settings.webp?v=2" alt="Configurações" loading="lazy" decoding="async" draggable="false" />
     <!-- Voltar: hotspot sobre a seta desenhada na arte (janela espelhada,
          igual aos cartões da home — parada é invisível; salta no .pop) -->
-    <button class="hotspot" id="cfgVoltar" aria-label="Voltar"><img class="mirror" src="assets/fkw-settings.webp" alt="" draggable="false" /></button>
+    <button class="hotspot" id="cfgVoltar" aria-label="Voltar"><img class="mirror" src="assets/fkw-settings.webp?v=2" alt="" draggable="false" /></button>
+    <!-- Perfil recriado em CÓDIGO (a arte v2 deixa o painel do perfil vazio):
+         avatar com anel + ícone de foto, SEU NOME com lápis e selo de NÍVEL —
+         mesmos lugares/tamanhos em que eram desenhados na arte antiga. -->
+    <div id="cfgAvatar" class="cfg-el" aria-hidden="true">
+      <svg class="cfgp-silhueta" viewBox="0 0 64 64"><circle cx="32" cy="24" r="13" fill="#d9e8f7"/><path d="M10 57c0-13 10-19 22-19s22 6 22 19" fill="none" stroke="#d9e8f7" stroke-width="6" stroke-linecap="round"/></svg>
+      <span class="cfgp-cam">
+        <svg viewBox="0 0 24 24" fill="#29d1ff"><path d="M9.2 4.4L7.9 6.3H4.9A2.2 2.2 0 0 0 2.7 8.5v9.2a2.2 2.2 0 0 0 2.2 2.2h14.2a2.2 2.2 0 0 0 2.2-2.2V8.5a2.2 2.2 0 0 0-2.2-2.2h-3l-1.3-1.9a1.5 1.5 0 0 0-1.2-.6h-3.2a1.5 1.5 0 0 0-1.2.6zM12 17.4a4.3 4.3 0 1 1 0-8.6 4.3 4.3 0 0 1 0 8.6z"/><circle cx="12" cy="13.1" r="2.5" fill="#0c1930"/></svg>
+      </span>
+    </div>
+    <div id="cfgNome" class="cfg-el">
+      <span>SEU NOME</span>
+      <svg class="cfgp-lapis" viewBox="0 0 24 24" aria-hidden="true"><path fill="#8fe1ff" d="M16.2 2.9l1.5-1.5a2 2 0 0 1 2.8 0l2.1 2.1a2 2 0 0 1 0 2.8l-1.5 1.5-4.9-4.9z"/><path fill="#2f9bff" d="M14.9 4.2l4.9 4.9L8.9 20 2.5 21.5 4 15.1 14.9 4.2z"/></svg>
+    </div>
+    <div id="cfgNivel" class="cfg-el"><span>NÍVEL 25</span></div>
     <!-- Seta do seletor de idioma (decorativa, como no modelo) -->
     <div id="cfgSeta" class="cfg-el" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="#2f9bff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>

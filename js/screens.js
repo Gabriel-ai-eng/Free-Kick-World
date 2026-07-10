@@ -199,11 +199,16 @@ popGo('btnChat',        ()=>toast('Chat em breve 💬'));
 // ficam apenas os elementos INTERATIVOS, projetados sobre a arte com a MESMA
 // matemática cover dos botões da home (retângulos em px da arte 6400×2900):
 //   • cfgVoltar  → hotspot sobre a seta "voltar" desenhada no topo;
+//   • cfgAvatar / cfgNome / cfgNivel → perfil recriado em código (a arte v2
+//     deixa o painel vazio); mesmos lugares da arte antiga;
 //   • cfgSeta    → seta do seletor de idioma (decorativa);
 //   • cfgToggle  → interruptor da linha "Notificações";
 //   • cfgMusica / cfgEfeitos → barras de volume (trilha + bolinha + %).
 const CFG_ART = {
   cfgVoltar:  [  75,  65,  320, 305],
+  cfgAvatar:  [ 520,  466,  838, 838],
+  cfgNome:    [1526,  648, 1150, 190],
+  cfgNivel:   [1526,  904,  510, 166],
   cfgSeta:    [3075, 1462,  120, 120],
   cfgToggle:  [2928, 2158,  270, 132],
   cfgMusica:  [3890, 1668, 2350, 135],
@@ -276,7 +281,7 @@ popGo('cfgVoltar', ()=>{ show('title'); state.scene='title'; });
 
 // Aquecer o cache da arte das Configurações depois que a home carregou, para a
 // tela abrir sem "piscar" na primeira vez (o <img> dela é loading="lazy").
-setTimeout(()=>{ const i=new Image(); i.src='assets/fkw-settings.webp'; }, 2500);
+setTimeout(()=>{ const i=new Image(); i.src='assets/fkw-settings.webp?v=2'; }, 2500);
 // "JOGAR DE NOVO" (tela de fim): a partida acabou, então começa uma nova.
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);
 // Tela de RANKING (placeholder por enquanto)
