@@ -208,6 +208,9 @@ async function initPersistence(){
     show('title'); state.scene='title';
     if(gameUser){
       await loadBest(); await loadState();
+      // E-mail da conta (mesmo login do Alps OS): já vem no user da sessão,
+      // sem precisar de outra consulta.
+      if(typeof cfgSetEmail==='function') cfgSetEmail(gameUser.email);
       // Busca à parte (não faz parte do `state` da partida) — não precisa
       // esperar para a home aparecer; atualiza o avatar assim que chegar.
       carregarFotoPerfil().then(url=>{ if(url && typeof cfgSetFoto==='function') cfgSetFoto(url); });
