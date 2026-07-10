@@ -347,6 +347,7 @@ cfgFotoInput.addEventListener('change', async ()=>{
   try{
     const url = await enviarFotoPerfil(file);
     cfgSetFoto(url);
+    if(typeof avatarCacheSet==='function') avatarCacheSet(url);
   }catch(_){
     toast('Não deu pra enviar a foto. Tenta de novo.');
   }finally{
