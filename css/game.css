@@ -294,15 +294,17 @@
     pointer-events:auto; }
   #knob { position:absolute; width:44px; height:44px; border-radius:50%; left:30px; top:30px;
     background:rgba(125,211,252,.55); border:3px solid rgba(125,211,252,.9); }
-  /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR */
-  .actbtn { position:absolute; border-radius:50%; display:flex; align-items:center;
-    justify-content:center; font-family:inherit; font-weight:bold; letter-spacing:1px;
-    color:#06251c; pointer-events:auto; transition:transform .06s; }
+  /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR — ícones
+     próprios (anel neon já desenhado na arte), sem fundo/borda extra daqui. */
+  .actbtn { position:absolute; border-radius:50%; pointer-events:auto;
+    touch-action:none; transition:transform .06s; }
   .actbtn:active { transform:scale(.9); }
-  #kick { bottom:24px; right:max(24px, env(safe-area-inset-right)); width:84px; height:84px; font-size:15px;
-    background:rgba(52,211,153,.55); border:4px solid #059669; }
-  #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 92px); width:72px; height:72px; font-size:14px;
-    background:rgba(125,211,252,.5); border:4px solid #0284c7; }
+  .actimg { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
+  #kick { bottom:24px; right:max(24px, env(safe-area-inset-right)); width:88px; height:88px;
+    filter:drop-shadow(0 0 10px rgba(245,197,66,.6)); }
+  #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 96px); width:76px; height:76px;
+    filter:drop-shadow(0 0 10px rgba(41,209,255,.6)); }
 
   /* ---------- Zoom da câmera (Longe / Perto) ---------- */
   #zoom { position:absolute; top:8px; left:50%; transform:translateX(-50%);
