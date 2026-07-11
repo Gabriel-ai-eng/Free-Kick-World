@@ -118,8 +118,7 @@ function drawPlayer(){
     f = Math.floor(player.anim) % sheet.frames;
   }
   const col=f%sheet.cols, row=Math.floor(f/sheet.cols);
-  ctx.imageSmoothingEnabled=true;        // filtragem suave (alta qualidade, sem serrilhado)
-  ctx.imageSmoothingQuality='high';
+  ctx.imageSmoothingEnabled=false;       // sem suavização: mantém os quadros do sprite sheet nítidos
   ctx.save();
   ctx.translate(p.x, p.y - pz);               // levanta o sprite na altura do pulo
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
