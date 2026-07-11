@@ -351,17 +351,20 @@
   }
 
   /* ---------- Zoom da câmera (Longe / Perto) ---------- */
-  /* Movido para o canto superior direito: o centro agora é ocupado pelo
-     placar único (#scoreboard), bem mais largo que o antigo chip "1º TEMPO"
-     — no centro o botão ficava escondido atrás dele. */
-  #zoom { position:absolute; top:10px; right:max(14px, env(safe-area-inset-right)); left:auto; transform:none;
+  /* Perto do botão CHUTAR, um pouco acima dele (mesmo alinhamento à direita) —
+     vidro esmeralda temático (cor do gramado/halo do joystick), em vez do
+     cinza neutro de antes. */
+  #zoom { position:absolute; bottom:120px; top:auto; right:max(24px, env(safe-area-inset-right)); left:auto; transform:none;
     display:flex; gap:10px; pointer-events:auto; z-index:9; }
-  #zoom button { font-family:inherit; cursor:pointer; padding:6px 14px;
-    font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#e2e8f0;
-    background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4);
-    border-radius:999px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-    transition:transform .08s; }
+  #zoom button { font-family:inherit; cursor:pointer; padding:7px 16px;
+    font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#d7ffe9;
+    background:radial-gradient(circle at 30% 25%, rgba(120,255,180,.18), rgba(20,60,40,.07) 60%, rgba(5,8,15,.62) 100%);
+    border:1px solid rgba(120,255,180,.4); border-radius:999px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    box-shadow:0 0 12px rgba(90,230,150,.25), inset 0 0 10px rgba(120,255,180,.07), inset 0 1px 2px rgba(255,255,255,.08);
+    transition:transform .08s, box-shadow .15s, border-color .15s; }
   #zoom button:active { transform:scale(.92); }
+  #zoom button:hover { border-color:rgba(150,255,200,.6); box-shadow:0 0 16px rgba(90,230,150,.35), inset 0 0 10px rgba(120,255,180,.1); }
   #zoom button:disabled { opacity:.4; }
 
   /* ---------- Botão de menu (hambúrguer) ---------- */
