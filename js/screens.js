@@ -19,10 +19,17 @@ function goHome(){
   const go=()=>{ window.location.href='/home'; };
   Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
 }
+// Durante a PARTIDA o botão abre o painel de pausa (Continuar/Sair) em vez de
+// sair direto — nas outras telas (fim/tabela) mantém o comportamento antigo.
+const pauseOverlay=document.getElementById('pauseOverlay');
 document.getElementById('backBtn').onclick=()=>{
   if(state.scene==='title') goHome();
+  else if(state.scene==='game') pauseOverlay.classList.remove('hidden');
   else goToTitle();
 };
+pauseOverlay.addEventListener('click', e=>{ if(e.target===pauseOverlay) pauseOverlay.classList.add('hidden'); });
+document.getElementById('pauseContinuar').onclick=()=> pauseOverlay.classList.add('hidden');
+document.getElementById('pauseSair').onclick=()=>{ pauseOverlay.classList.add('hidden'); goToTitle(); };
 // "Cancelar" na tela "VIRE O CELULAR": volta direto para a Home.
 const rotateCancel=document.getElementById('rotateCancel');
 if(rotateCancel) rotateCancel.onclick=goHome;

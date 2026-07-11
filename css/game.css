@@ -271,17 +271,32 @@
   .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
   small.hint { color:#64748b; font-size:12px; max-width:520px; }
 
-  /* ---------- HUD ---------- */
+  /* ---------- HUD: placar único (time/gols + tempo + cronômetro) ---------- */
   /* Com viewport-fit=cover a página avança sobre o recorte da câmera; o
      max(..., env(safe-area-inset-*)) afasta os controles dessa área. */
   #hud { position:fixed; top:10px; left:0; right:0; z-index:8; display:none;
-    justify-content:space-between; pointer-events:none;
-    padding:0 max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
-    font-size:clamp(15px,3.6vw,22px); letter-spacing:1px; }
+    justify-content:center; pointer-events:none;
+    padding:0 max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left)); }
   #hud.on { display:flex; }
-  #hud .chip { background:rgba(5,8,15,.6); padding:6px 12px; border-radius:8px; color:#fcd34d; }
-  #hud .chip.time { color:#7dd3fc; }
-  #hud .chip.half { color:#fff; font-weight:700; letter-spacing:2px; border:1px solid rgba(255,255,255,.25); }
+  /* Um só painel de vidro reunindo time+gols, tempo e cronômetro — em vez de
+     três "chips" soltos. Divisórias vêm de border-right (some sozinho junto
+     com o TEMPO quando ele fica display:none no modo "rápida"). */
+  #scoreboard { display:flex; align-items:stretch; background:linear-gradient(180deg, rgba(10,16,28,.74), rgba(6,10,20,.82));
+    border:1px solid rgba(255,255,255,.14); border-radius:14px;
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 0 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    font-family:inherit; }
+  #scoreboard .sb-team, #scoreboard .sb-half, #scoreboard .sb-time { display:flex; align-items:center; padding:7px 14px; }
+  #scoreboard .sb-team { gap:7px; border-right:1px solid rgba(255,255,255,.14); }
+  #scoreboard .sb-crest { font-size:clamp(13px,3vw,17px); line-height:1; filter:drop-shadow(0 0 4px rgba(255,255,255,.25)); }
+  #scoreboard .sb-nome { font-size:clamp(10px,2.4vw,13px); font-weight:700; letter-spacing:1.5px; color:#e2e8f0; }
+  #scoreboard .sb-gols { font-size:clamp(13px,3vw,17px); font-weight:800; color:#fcd34d;
+    text-shadow:0 0 10px rgba(252,211,77,.5); min-width:1.1em; text-align:center; }
+  #scoreboard .sb-half { border-right:1px solid rgba(255,255,255,.14);
+    font-size:clamp(9px,2.2vw,12px); font-weight:700; letter-spacing:2px; color:#fff; opacity:.9; white-space:nowrap; }
+  #scoreboard .sb-time { gap:5px; font-size:clamp(12px,2.8vw,15px); font-weight:700; color:#7dd3fc;
+    text-shadow:0 0 10px rgba(125,211,252,.5); }
+  #scoreboard .sb-clock-ico { font-size:clamp(11px,2.6vw,14px); filter:drop-shadow(0 0 4px rgba(125,211,252,.6)); }
   #msg { position:fixed; top:30%; left:0; right:0; text-align:center; z-index:9;
     font-size:clamp(34px,10vw,80px); color:#fcd34d; letter-spacing:5px;
     text-shadow:3px 3px 0 #7c2d12; pointer-events:none; opacity:0; transition:opacity .18s; }
@@ -346,13 +361,40 @@
   #zoom button:active { transform:scale(.92); }
   #zoom button:disabled { opacity:.4; }
 
-  /* ---------- Botão Voltar (para a Home) ---------- */
+  /* ---------- Botão de menu (hambúrguer) ---------- */
+  /* Na HOME sai para o Alps; em partida, abre o painel de pausa (ver
+     #pauseOverlay) — mesmo vidro translúcido do #zoom, ícone em vez de texto. */
   #backBtn { position:fixed; top:10px; left:max(10px, env(safe-area-inset-left)); z-index:60; font-family:inherit;
-    cursor:pointer; display:flex; align-items:center; gap:4px; padding:5px 11px;
-    font-size:12px; letter-spacing:.5px; color:#e2e8f0; background:rgba(5,8,15,.5);
-    border:1px solid rgba(148,163,184,.4); border-radius:999px;
-    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
-  #backBtn:active { transform:scale(.93); }
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    width:38px; height:38px; padding:0; color:#e2e8f0; background:rgba(5,8,15,.5);
+    border:1px solid rgba(148,163,184,.4); border-radius:50%;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s, box-shadow .15s, border-color .15s; }
+  #backBtn svg { width:19px; height:19px; }
+  #backBtn:active { transform:scale(.9); }
+  #backBtn:hover { border-color:rgba(226,232,240,.55); box-shadow:0 0 12px rgba(226,232,240,.15); }
+
+  /* ---------- Painel de pausa (Continuar / Sair) ---------- */
+  #pauseOverlay { position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+    background:rgba(4,8,16,.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  #pauseOverlay.hidden { display:none; }
+  #pausePainel { min-width:230px; padding:28px 32px 24px; border-radius:18px;
+    background:linear-gradient(180deg, rgba(22,34,50,.9), rgba(9,16,28,.94));
+    border:1px solid rgba(125,211,252,.28);
+    box-shadow:0 0 40px rgba(0,0,0,.5), 0 0 30px rgba(125,211,252,.1), inset 0 1px 0 rgba(255,255,255,.05);
+    display:flex; flex-direction:column; gap:12px; font-family:inherit; }
+  .pauseTitulo { color:#dce8ff; font-size:14px; letter-spacing:.24em; text-transform:uppercase;
+    text-align:center; margin:0 0 8px; opacity:.6; font-weight:700; }
+  .pauseBtn { font-family:inherit; appearance:none; border:none; cursor:pointer; padding:12px 20px;
+    border-radius:12px; font-weight:700; font-size:16px; letter-spacing:.1em; text-transform:uppercase;
+    transition:transform .1s ease, box-shadow .15s ease; color:#dce8ff;
+    background:radial-gradient(circle at 30% 25%, rgba(125,211,252,.22), rgba(56,150,255,.06) 60%, transparent 100%);
+    border:1px solid rgba(125,211,252,.4);
+    box-shadow:0 0 14px rgba(125,211,252,.16), inset 0 0 14px rgba(125,211,252,.06); }
+  .pauseBtn:active { transform:scale(.97); }
+  /* Sair fica discreto/neutro (mesma família do .btn.ghost) — não deve
+     competir com Continuar, que é a ação esperada. */
+  .pauseBtn.sair { color:#94a3b8; border-color:rgba(148,163,184,.3);
+    background:rgba(30,41,59,.65); box-shadow:inset 0 0 14px rgba(0,0,0,.2); }
 
   /* ---------- Overlay: gire o celular para a horizontal ---------- */
   #rotate { position:fixed; inset:0; z-index:50; display:none;

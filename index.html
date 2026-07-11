@@ -40,8 +40,24 @@
      ser exibida (show() em screens.js já esconde sozinha, uma única vez). -->
 <div id="bootCover"></div>
 
-<!-- Voltar para a Home -->
-<button id="backBtn">← Voltar</button>
+<!-- Menu (hambúrguer): na HOME sai para o Alps; em partida, abre o painel de
+     pausa (Continuar/Sair) — ver #pauseOverlay e a lógica em screens.js. -->
+<button id="backBtn" aria-label="Menu" title="Menu">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+</button>
+
+<!-- Painel de pausa: aberto pelo botão de menu durante a partida -->
+<div id="pauseOverlay" class="hidden">
+  <div id="pausePainel">
+    <p class="pauseTitulo">Pausado</p>
+    <button class="pauseBtn" id="pauseContinuar">Continuar</button>
+    <button class="pauseBtn sair" id="pauseSair">Sair</button>
+  </div>
+</div>
 
 <!-- Gire o celular -->
 <div id="rotate">
@@ -50,11 +66,18 @@
   <button id="rotateCancel" type="button">Cancelar</button>
 </div>
 
-<!-- HUD -->
+<!-- HUD: placar único (time + gols, tempo, cronômetro) — mesma linguagem
+     visual dos botões PULAR/CHUTAR (dourado/ciano) num só painel de vidro. -->
 <div id="hud">
-  <div class="chip">⚽ GOLS: <span id="score">0</span></div>
-  <div class="chip half" id="half" style="display:none">1º TEMPO</div>
-  <div class="chip time">⏱ <span id="time">60</span></div>
+  <div id="scoreboard">
+    <div class="sb-team">
+      <span class="sb-crest">🇧🇷</span>
+      <span class="sb-nome">BRASIL</span>
+      <span class="sb-gols" id="score">0</span>
+    </div>
+    <div class="sb-half" id="half" style="display:none">1º TEMPO</div>
+    <div class="sb-time"><span class="sb-clock-ico">⏱</span><span id="time">60</span></div>
+  </div>
 </div>
 <div id="msg"></div>
 
