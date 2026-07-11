@@ -63,7 +63,15 @@
   <div id="zoom">
     <button id="camToggle">🔍 Perto</button>
   </div>
-  <div id="stick"><div id="knob"></div></div>
+  <!-- Joystick: arte própria (campo + setas na base, bola com anel no manípulo).
+       #stickHalo é o brilho difuso ao redor da base (inspirado no efeito de
+       halo/glow que suaviza a transição pro gramado); a base/bola em si vêm
+       das imagens (sem fundo/borda desenhados aqui). -->
+  <div id="stick">
+    <div id="stickHalo"></div>
+    <img id="stickBase" src="assets/joystick-base.webp" alt="" draggable="false" />
+    <div id="knob"><img id="knobImg" src="assets/joystick-knob.webp" alt="" draggable="false" /></div>
+  </div>
   <!-- PULAR/CHUTAR: ícones próprios (anel neon já desenhado na arte), em vez
        de texto — mesmo padrão dos botões da home (img preenchendo o botão). -->
   <div id="jump" class="actbtn" aria-label="Pular">

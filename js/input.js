@@ -14,8 +14,8 @@ addEventListener('keyup',e=> keys[e.key.toLowerCase()]=false);
 const stick=document.getElementById('stick'), knob=document.getElementById('knob'),
       kickBtn=document.getElementById('kick'), jumpBtn=document.getElementById('jump');
 let stickVec={x:0,y:0}, stickPid=null, center={x:0,y:0};
-const MAXR=34;
-function setKnob(dx,dy){ knob.style.left=(30+dx)+'px'; knob.style.top=(30+dy)+'px'; }
+const MAXR=39;
+function setKnob(dx,dy){ knob.style.left=(37+dx)+'px'; knob.style.top=(37+dy)+'px'; }
 stick.addEventListener('pointerdown',e=>{
   stickPid=e.pointerId; stick.setPointerCapture(e.pointerId);
   const r=stick.getBoundingClientRect(); center={x:r.left+r.width/2,y:r.top+r.height/2}; movePointer(e);

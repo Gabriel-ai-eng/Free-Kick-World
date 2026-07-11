@@ -289,11 +289,24 @@
   /* ---------- Controles na tela ---------- */
   #pad { position:fixed; inset:0; z-index:7; display:none; pointer-events:none; }
   #pad.on { display:block; }
-  #stick { position:absolute; bottom:22px; left:max(22px, env(safe-area-inset-left)); width:104px; height:104px;
-    border-radius:50%; background:rgba(148,163,184,.16); border:3px solid rgba(148,163,184,.45);
-    pointer-events:auto; }
-  #knob { position:absolute; width:44px; height:44px; border-radius:50%; left:30px; top:30px;
-    background:rgba(125,211,252,.55); border:3px solid rgba(125,211,252,.9); }
+  #stick { position:absolute; bottom:22px; left:max(22px, env(safe-area-inset-left)); width:120px; height:120px;
+    border-radius:50%; pointer-events:auto; }
+  /* Halo: brilho difuso e semitransparente logo além da borda sólida da base,
+     suavizando a transição para o gramado atrás — mesmo efeito de imagens de
+     referência de joystick de campo. Um anel (radial-gradient) maior que a
+     base, com leve desfoque, sem capturar toque (a área de toque é #stick). */
+  #stickHalo { position:absolute; inset:-22%; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle,
+      rgba(190,255,160,0) 60%,
+      rgba(190,255,160,.30) 68%,
+      rgba(190,255,160,.16) 76%,
+      rgba(190,255,160,0) 90%);
+    filter:blur(2.5px); }
+  #stickBase { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
+  #knob { position:absolute; width:46px; height:46px; left:37px; top:37px; }
+  #knobImg { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
   /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR — ícones
      próprios (anel neon já desenhado na arte), sem fundo/borda extra daqui. */
   .actbtn { position:absolute; border-radius:50%; pointer-events:auto;
