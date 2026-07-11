@@ -297,12 +297,23 @@
   /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR — ícones
      próprios (anel neon já desenhado na arte), sem fundo/borda extra daqui. */
   .actbtn { position:absolute; border-radius:50%; pointer-events:auto;
-    touch-action:none; transition:transform .06s; }
+    touch-action:none; transition:transform .06s; overflow:visible; }
   .actbtn:active { transform:scale(.9); }
   .actimg { position:absolute; inset:0; width:100%; height:100%;
     object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
   #kick { bottom:24px; right:max(24px, env(safe-area-inset-right)); width:88px; height:88px;
     filter:drop-shadow(0 0 10px rgba(245,197,66,.6)); }
+  /* Anel de seleção do chute: some em repouso; ao clicar/segurar, aparece e
+     expande ao redor da bola indicando que o botão foi acionado. */
+  .actring { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; pointer-events:none; -webkit-user-drag:none;
+    opacity:0; transform:scale(.8); transition:transform .18s ease-out, opacity .18s ease-out; }
+  #kick.pressed .actring { opacity:1; transform:scale(1.35);
+    animation:kickRingPulse .7s ease-in-out infinite; }
+  @keyframes kickRingPulse {
+    0%,100% { transform:scale(1.35); }
+    50% { transform:scale(1.5); }
+  }
   #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 96px); width:76px; height:76px;
     filter:drop-shadow(0 0 10px rgba(41,209,255,.6)); }
 

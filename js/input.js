@@ -29,7 +29,9 @@ function movePointer(e){
   if(d>MAXR){ dx=dx/d*MAXR; dy=dy/d*MAXR; } setKnob(dx,dy);
   stickVec={x:dx/MAXR, y:dy/MAXR};
 }
-kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kick(); });
+kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kickBtn.classList.add('pressed'); kick(); });
+['pointerup','pointercancel','pointerleave'].forEach(ev=>
+  kickBtn.addEventListener(ev, ()=> kickBtn.classList.remove('pressed')));
 jumpBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); jump(); });
 
 // Botão único de câmera: alterna entre Longe e Perto.
