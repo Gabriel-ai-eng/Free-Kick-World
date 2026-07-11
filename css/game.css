@@ -303,19 +303,19 @@
     object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
   #kick { bottom:24px; right:max(24px, env(safe-area-inset-right)); width:88px; height:88px;
     filter:drop-shadow(0 0 10px rgba(245,197,66,.6)); }
-  /* Anel de seleção do chute: some em repouso; ao clicar/segurar, aparece e
-     expande ao redor da bola indicando que o botão foi acionado. */
+  #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 96px); width:76px; height:76px;
+    filter:drop-shadow(0 0 10px rgba(41,209,255,.6)); }
+  /* Anel de seleção: some em repouso; ao clicar/segurar em PULAR ou CHUTAR,
+     aparece e expande ao redor do ícone indicando que o botão foi acionado. */
   .actring { position:absolute; inset:0; width:100%; height:100%;
     object-fit:contain; pointer-events:none; -webkit-user-drag:none;
     opacity:0; transform:scale(.8); transition:transform .18s ease-out, opacity .18s ease-out; }
-  #kick.pressed .actring { opacity:1; transform:scale(1.35);
-    animation:kickRingPulse .7s ease-in-out infinite; }
-  @keyframes kickRingPulse {
+  .actbtn.pressed .actring { opacity:1; transform:scale(1.35);
+    animation:actRingPulse .7s ease-in-out infinite; }
+  @keyframes actRingPulse {
     0%,100% { transform:scale(1.35); }
     50% { transform:scale(1.5); }
   }
-  #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 96px); width:76px; height:76px;
-    filter:drop-shadow(0 0 10px rgba(41,209,255,.6)); }
 
   /* ---------- Zoom da câmera (Longe / Perto) ---------- */
   #zoom { position:absolute; top:8px; left:50%; transform:translateX(-50%);

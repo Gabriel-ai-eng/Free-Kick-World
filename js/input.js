@@ -30,9 +30,11 @@ function movePointer(e){
   stickVec={x:dx/MAXR, y:dy/MAXR};
 }
 kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kickBtn.classList.add('pressed'); kick(); });
-['pointerup','pointercancel','pointerleave'].forEach(ev=>
-  kickBtn.addEventListener(ev, ()=> kickBtn.classList.remove('pressed')));
-jumpBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); jump(); });
+jumpBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); jumpBtn.classList.add('pressed'); jump(); });
+['pointerup','pointercancel','pointerleave'].forEach(ev=>{
+  kickBtn.addEventListener(ev, ()=> kickBtn.classList.remove('pressed'));
+  jumpBtn.addEventListener(ev, ()=> jumpBtn.classList.remove('pressed'));
+});
 
 // Botão único de câmera: alterna entre Longe e Perto.
 // Longe → texto "Perto" (vai aproximar); Perto → texto "Longe" (vai afastar).
