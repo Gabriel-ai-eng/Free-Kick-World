@@ -351,8 +351,11 @@
   }
 
   /* ---------- Zoom da câmera (Longe / Perto) ---------- */
-  #zoom { position:absolute; top:8px; left:50%; transform:translateX(-50%);
-    display:flex; gap:10px; pointer-events:auto; }
+  /* Movido para o canto superior direito: o centro agora é ocupado pelo
+     placar único (#scoreboard), bem mais largo que o antigo chip "1º TEMPO"
+     — no centro o botão ficava escondido atrás dele. */
+  #zoom { position:absolute; top:10px; right:max(14px, env(safe-area-inset-right)); left:auto; transform:none;
+    display:flex; gap:10px; pointer-events:auto; z-index:9; }
   #zoom button { font-family:inherit; cursor:pointer; padding:6px 14px;
     font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#e2e8f0;
     background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4);
