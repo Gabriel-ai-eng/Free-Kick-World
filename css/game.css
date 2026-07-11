@@ -306,10 +306,15 @@
   #jump { bottom:30px; right:calc(max(24px, env(safe-area-inset-right)) + 96px); width:76px; height:76px;
     filter:drop-shadow(0 0 10px rgba(41,209,255,.6)); }
   /* Anel de seleção: sempre visível ao redor do ícone; ao clicar/segurar em
-     PULAR ou CHUTAR, expande e pulsa indicando que o botão foi acionado. */
+     PULAR ou CHUTAR, expande e pulsa indicando que o botão foi acionado. O
+     traço da arte é fino, então reforçamos com glow para virar um arco
+     nítido (dourado no chute, azul no pulo) em vez de sumir ao lado do
+     anel já desenhado na própria arte do botão. */
   .actring { position:absolute; inset:0; width:100%; height:100%;
     object-fit:contain; pointer-events:none; -webkit-user-drag:none;
     transform:scale(1); transition:transform .18s ease-out; }
+  #kick .actring { filter:drop-shadow(0 0 3px rgba(250,204,21,.95)) drop-shadow(0 0 8px rgba(250,204,21,.7)); }
+  #jump .actring { filter:drop-shadow(0 0 3px rgba(56,189,248,.95)) drop-shadow(0 0 8px rgba(56,189,248,.7)); }
   .actbtn.pressed .actring { transform:scale(1.35);
     animation:actRingPulse .7s ease-in-out infinite; }
   @keyframes actRingPulse {
