@@ -3,14 +3,16 @@
 // FIELD — geometria do campo em perspectiva, escala por profundidade, uv→tela
 // =========================================================================
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
+// Medido na arte NOVA do estádio (assets/cenario-*.webp, 1536×1024): o quad é
+// a GRAMA inteira (linhas ficam no inset 0.03/0.045 de FieldLinesProcedural,
+// exatamente onde estavam pintadas na arte original).
 const PITCH = {
-  TL:{x:0.215,y:0.550}, TR:{x:0.785,y:0.550},
-  BR:{x:0.955,y:0.895}, BL:{x:0.045,y:0.895},
+  TL:{x:0.1509,y:0.3071}, TR:{x:0.8472,y:0.3071},
+  BR:{x:0.9819,y:0.7729}, BL:{x:0.0161,y:0.7729},
 };
-// Espaço virtual do estádio (aspecto preservado do original ~1.54) — o PITCH é
-// normalizado nele, então o alinhamento do campo continua idêntico. Resolução
-// alta para captar público denso, texto dos painéis e múltiplos níveis.
-const STADIUM_W = 1600, STADIUM_H = 1038;
+// Espaço virtual do estádio = tamanho da arte nova (as peças do cenário são
+// montadas 1:1 nesse espaço — ver js/assets/cenario.js e js/stadium.js).
+const STADIUM_W = 1536, STADIUM_H = 1024;
 let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (cover)
 function layoutStadium(){
   // "cover": preenche a tela inteira, sem bordas pretas. Alinhado pela BASE

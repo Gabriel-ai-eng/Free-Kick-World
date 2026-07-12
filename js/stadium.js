@@ -18,7 +18,7 @@ const Stadium = {
   W: STADIUM_W, H: STADIUM_H,
   // --- CONFIG: tudo controlável por código. Mude e chame Stadium.rebuild(). ---
   cfg: {
-    sky:    { top:'#02040f', mid:'#06122a', stars:130 },
+    sky:    { top:'#010409', mid:'#041020', stars:130 },
     struct: { roof:'#0a1322', truss:'#22324e', facade:'#0a1320', shadow:0.5 },
     crowd:  { density:0.62,
               people:[[232,150,68],[245,198,86],[70,120,182],[120,165,212],[224,231,241],[198,86,70],[96,152,112],[176,192,214],[150,170,200],[210,170,120]],
@@ -26,8 +26,14 @@ const Stadium = {
               tiers:[0.245,0.32,0.40,0.475], concourse:'#04070e', rail:'#7188af', exit:'#37d268', vom:'#02030a' },
     boards: { bg:'#12409a', bg2:'#0a2a66', edge:'#3a6fd0', y1:'#ffe14d', w:'#ffffff',
               msgs:['PIXEL SPORT','BRASIL FUTEBOL'] },
-    grass:  { light:'#52b657', dark:'#3b9444', stripes:18, mow:'vertical',
-              pool:'#dcf4b4', poolA:0.13, noise:0.5, wear:0, mud:0, snow:0 },
+    // grass.daArte: usa a textura REAL extraída da arte (cenario-grama.webp);
+    // light/dark são o fallback procedural (amostrados da mesma arte).
+    grass:  { light:'#2f7526', dark:'#286723', stripes:14, mow:'vertical', daArte:true,
+              pool:'#dcf4b4', poolA:0.10, noise:0.5, wear:0, mud:0, snow:0 },
+    // LUZES do cenário novo (holofotes emissivos, tintados em tempo de pintura):
+    // mude cor/saturação/brilho/intensidade e chame Stadium.rebuild() — ou use
+    // window.FKW_CENARIO.definirLuz('holofotes', {...}) / aplicarPreset('alerta').
+    luzes:  { holofotes: { cor:'#e8f2ff', saturacao:1, brilho:1, intensidade:1 } },
     lines:  { color:'#f3faf5', width:2.6, inset_u:0.03, inset_v:0.045 },
     goals:  { post:'#f5f9fd', net:'190,202,222', depth:0.05, vH:0.072, gh:0.06,
               imgScale:2.4, imgLift:0.0 },  // imgScale: ajuste fino de tamanho (1=encaixe exato nas traves); imgLift: sobe/desce a base
@@ -54,15 +60,30 @@ const Stadium = {
     this.pitch={ TL:{x:PITCH.TL.x*this.W,y:PITCH.TL.y*this.H}, TR:{x:PITCH.TR.x*this.W,y:PITCH.TR.y*this.H},
                  BR:{x:PITCH.BR.x*this.W,y:PITCH.BR.y*this.H}, BL:{x:PITCH.BL.x*this.W,y:PITCH.BL.y*this.H} };
     const L=this.L;
-    L.Sky(this,c);                 // céu noturno + estrelas
-    L.UpperCrowd(this,c);          // arquibancada superior (vários níveis)
-    L.LowerCrowd(this,c);          // nível inferior + laterais + faixa próxima
-    L.StadiumStructure(this,c);    // teto, treliças, fachada
-    L.StadiumLights(this,c);       // torres de refletor + faixa de LED + brilho
-    L.Billboards(this,c);          // painéis publicitários (objetos independentes)
-    L.GrassTileMap(this,c);        // gramado modular com variação
+    // Cenário NOVO por TILES (js/assets/cenario.js). Se os atlas ainda não
+    // chegaram, cai no estádio procedural antigo — mesma ordem de camadas.
+    const temTiles = typeof cenarioEstadioImg!=='undefined' &&
+                     cenarioEstadioImg.complete && cenarioEstadioImg.naturalWidth>0;
+    L.Sky(this,c);                   // céu noturno
+    if(temTiles){
+      L.ArquibancadaFundo(this,c);   // arquibancada do fundo + torres (luz de-baked)
+      L.HolofotesLuz(this,c);        // holofotes EMISSIVOS (cor via cfg.luzes)
+      L.Laterais(this,c);            // arquibancadas laterais
+      L.PlacaTopo(this,c);           // placas do fundo (segmento tileado)
+    } else {
+      L.UpperCrowd(this,c);          // arquibancada superior (vários níveis)
+      L.LowerCrowd(this,c);          // nível inferior + laterais + faixa próxima
+      L.StadiumStructure(this,c);    // teto, treliças, fachada
+      L.StadiumLights(this,c);       // torres de refletor + faixa de LED + brilho
+      L.Billboards(this,c);          // painéis publicitários (objetos independentes)
+    }
+    L.GrassTileMap(this,c);        // gramado (textura da arte OU procedural)
     L.FieldLinesProcedural(this,c);// linhas desenhadas proceduralmente
     L.Goals(this,c);               // traves + redes (cenas independentes)
+    if(temTiles){
+      L.PlacaFrente(this,c);         // placas da frente (segmento tileado)
+      L.ArquibancadaFrente(this,c);  // arquibancada da frente + cabine
+    }
     L.DynamicShadows(this,c);      // sombras ambientais + vinheta
     this.built=true;
   },
@@ -157,6 +178,41 @@ const Stadium = {
     c.putImageData(reg,0,y0);
   },
 
+  // ---- TINT de sprites emissivos (a cor da luz é aplicada NA PINTURA) ----
+  // O sprite de luz é neutro (cinza+alfa); multiplica pela cor do grupo e soma
+  // à cena com 'lighter'. Trocar a cor em cfg.luzes + rebuild() = luz nova,
+  // sem tocar em nenhuma imagem.
+  _tintCv:null,
+  _corLuz(g){
+    const h=g.cor.replace('#',''); let r=parseInt(h.slice(0,2),16), gg=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+    const sat=g.saturacao==null?1:g.saturacao, bri=g.brilho==null?1:g.brilho;
+    if(sat!==1){ const cz=0.299*r+0.587*gg+0.114*b; r=cz+(r-cz)*sat; gg=cz+(gg-cz)*sat; b=cz+(b-cz)*sat; }
+    return `rgb(${Math.min(255,r*bri)|0},${Math.min(255,gg*bri)|0},${Math.min(255,b*bri)|0})`;
+  },
+  _tintar(c, img, r, dx,dy,dw,dh, cor, alfa){
+    if(alfa<=0.01) return;
+    if(!this._tintCv) this._tintCv=document.createElement('canvas');
+    const tc=this._tintCv;
+    if(tc.width<r.w) tc.width=r.w;
+    if(tc.height<r.h) tc.height=r.h;
+    const t=tc.getContext('2d');
+    t.globalCompositeOperation='source-over'; t.clearRect(0,0,r.w,r.h);
+    t.drawImage(img, r.x,r.y,r.w,r.h, 0,0,r.w,r.h);
+    t.globalCompositeOperation='multiply'; t.fillStyle=cor; t.fillRect(0,0,r.w,r.h);
+    t.globalCompositeOperation='destination-in'; t.drawImage(img, r.x,r.y,r.w,r.h, 0,0,r.w,r.h);
+    c.save(); c.globalAlpha=Math.min(1,alfa); c.globalCompositeOperation='lighter';
+    c.drawImage(tc, 0,0,r.w,r.h, dx,dy,dw,dh); c.restore();
+  },
+  // desenha um tile do atlas repetido horizontalmente de x0 a x1 (na altura y);
+  // o último pedaço é cortado na fonte para não vazar além de x1
+  _tileX(c, img, r, x0, x1, y, s){
+    const w=r.w*s;
+    for(let x=x0; x<x1; x+=w){
+      const sw=Math.min(r.w, (x1-x)/s);
+      c.drawImage(img, r.x, r.y, sw, r.h, x, y, sw*s, r.h*s);
+    }
+  },
+
   // ---- CAMADAS ----
   L:{
     Sky(S,c){
@@ -165,6 +221,39 @@ const Stadium = {
       c.fillStyle=g; c.fillRect(0,0,W,H*0.20);
       for(let i=0;i<k.stars;i++){ c.globalAlpha=Math.random()*0.7+0.2; c.fillStyle='#fff'; c.fillRect(Math.random()*W, Math.random()*H*0.12, 1.5,1.5); }
       c.globalAlpha=1;
+    },
+    // ---- Camadas do cenário NOVO (tiles de js/assets/cenario.js) ----
+    // Tudo montado no espaço 1536×1024 da arte, escalado por s ao canvas.
+    ArquibancadaFundo(S,c){
+      const s=S.W/1536, T=CENARIO_TILES.arqTop, P=CENARIO_POS.arqTop;
+      c.drawImage(cenarioEstadioImg, T.x,T.y,T.w,T.h, P.x*s, P.y*s, T.w*s, T.h*s);
+    },
+    HolofotesLuz(S,c){
+      if(!(cenarioLuzesImg.complete && cenarioLuzesImg.naturalWidth>0)) return;
+      const s=S.W/1536, g=S.cfg.luzes.holofotes, cor=S._corLuz(g);
+      for(const t of CENARIO_HOLOFOTES)
+        S._tintar(c, cenarioLuzesImg, t.r, t.dx*s, t.dy*s, t.r.w*s, t.r.h*s, cor, g.intensidade);
+    },
+    Laterais(S,c){
+      const s=S.W/1536;
+      const E=CENARIO_TILES.lateralEsq, PE=CENARIO_POS.lateralEsq;
+      const D=CENARIO_TILES.lateralDir, PD=CENARIO_POS.lateralDir;
+      c.drawImage(cenarioEstadioImg, E.x,E.y,E.w,E.h, PE.x*s, PE.y*s, E.w*s, E.h*s);
+      c.drawImage(cenarioEstadioImg, D.x,D.y,D.w,D.h, PD.x*s, PD.y*s, D.w*s, D.h*s);
+    },
+    PlacaTopo(S,c){
+      const s=S.W/1536, P=CENARIO_POS.placaTop;
+      S._tileX(c, cenarioEstadioImg, CENARIO_TILES.placaTopSeg, P.x0*s, P.x1*s, P.y*s, s);
+    },
+    PlacaFrente(S,c){
+      const s=S.W/1536, P=CENARIO_POS.placaBaixo;
+      S._tileX(c, cenarioEstadioImg, CENARIO_TILES.placaBaixoSeg, P.x0*s, P.x1*s, P.y*s, s);
+    },
+    ArquibancadaFrente(S,c){
+      const s=S.W/1536, P=CENARIO_POS.arqBaixo;
+      S._tileX(c, cenarioEstadioImg, CENARIO_TILES.arqBaixoSeg, P.x0*s, P.x1*s, P.y*s, s);
+      const T=CENARIO_TILES.cabine, PC=CENARIO_POS.cabine;
+      c.drawImage(cenarioEstadioImg, T.x,T.y,T.w,T.h, PC.x*s, PC.y*s, T.w*s, T.h*s);
     },
     UpperCrowd(S,c){
       const k=S.cfg.crowd, W=S.W, H=S.H;
@@ -231,13 +320,18 @@ const Stadium = {
     GrassTileMap(S,c){
       const g=S.cfg.grass; c.save(); S.pitchPath(c,0); c.clip();
       c.fillStyle=g.dark; c.fillRect(0,0,S.W,S.H);
-      // ---- Gramado PROCEDURAL HD (textura gerada em _makeGrassTex) ----
-      // Fatiada no trapézio com a MESMA matemática de faixas usada antes com a
-      // foto: cada faixa horizontal da textura (espaço do campo, x=u / y=v) é
-      // esticada para a largura do campo naquela profundidade — perspectiva
-      // idêntica, zero costura (as faixas se sobrepõem 0.5px).
-      if(!S._grassTex) S._grassTex=S._makeGrassTex();
-      const tex=S._grassTex, tw=tex.width, th=tex.height;
+      // ---- Gramado: textura REAL da arte (cenario-grama.webp) quando
+      // disponível (grass.daArte), senão o procedural (_makeGrassTex). As duas
+      // vivem em "espaço do campo" (x=u / y=v) e são fatiadas no trapézio com
+      // a mesma matemática de faixas: cada faixa horizontal é esticada para a
+      // largura do campo naquela profundidade — perspectiva idêntica, zero
+      // costura (as faixas se sobrepõem 0.5px).
+      const daArte = g.daArte!==false && typeof cenarioGramaImg!=='undefined' &&
+                     cenarioGramaImg.complete && cenarioGramaImg.naturalWidth>0;
+      let tex;
+      if(daArte){ tex=cenarioGramaImg; }
+      else { if(!S._grassTex) S._grassTex=S._makeGrassTex(); tex=S._grassTex; }
+      const tw=tex.naturalWidth||tex.width, th=tex.naturalHeight||tex.height;
       const N=96; c.imageSmoothingEnabled=true;
       for(let i=0;i<N;i++){
         const t0=i/N, t1=(i+1)/N;
@@ -369,4 +463,45 @@ const Stadium = {
     ctx.restore();
   },
 };
+
+// =========================================================================
+// CONTROLE DO CENÁRIO EM TEMPO REAL — window.FKW_CENARIO
+// -------------------------------------------------------------------------
+// Mesmo espírito do Projeto Armor: a luz NÃO está gravada na arte (holofotes
+// são máscaras emissivas tintadas na pintura), então dá para mudar cor/
+// saturação/brilho/intensidade e o clima geral em tempo real, sem redesenhar
+// nenhum sprite. No console:
+//   FKW_CENARIO.aplicarPreset('alerta')     // padrao | claro | escuro | alerta | futurista
+//   FKW_CENARIO.definirLuz('holofotes', { cor:'#ff5040', intensidade:1.2 })
+//   Stadium.cfg.weather={type:'rain',intensity:.7}  (clima continua no cfg)
+// =========================================================================
+const FKW_CENARIO = (() => {
+  const FABRICA = JSON.parse(JSON.stringify(Stadium.cfg));
+  const PRESETS = {
+    padrao:    {},
+    claro:     { luzes:{ holofotes:{ intensidade:1.25 } }, shadows:{ vignette:0.3, rim:0.35 } },
+    escuro:    { luzes:{ holofotes:{ intensidade:0.4 } },  shadows:{ vignette:0.72 }, grass:{ poolA:0.04 } },
+    alerta:    { luzes:{ holofotes:{ cor:'#ff5040', intensidade:1.1 } }, shadows:{ vignette:0.62 },
+                 grass:{ pool:'#ffc4b4', poolA:0.12 } },
+    futurista: { luzes:{ holofotes:{ cor:'#4a9fff', intensidade:1.15 } },
+                 grass:{ pool:'#cfe4ff', poolA:0.14 } },
+  };
+  const mesclar = (alvo, src) => { for(const k in src){
+    if(src[k] && typeof src[k]==='object' && !Array.isArray(src[k])){ mesclar(alvo[k], src[k]); }
+    else alvo[k]=src[k];
+  } };
+  return {
+    PRESETS,
+    definirLuz(grupo, props){
+      if(!Stadium.cfg.luzes[grupo]) return false;
+      Object.assign(Stadium.cfg.luzes[grupo], props); Stadium.rebuild(); return true;
+    },
+    aplicarPreset(nome){
+      const p=PRESETS[nome]; if(!p) return false;
+      mesclar(Stadium.cfg, JSON.parse(JSON.stringify(FABRICA)));
+      mesclar(Stadium.cfg, p); Stadium.rebuild(); return true;
+    },
+  };
+})();
+if (typeof window!=='undefined') window.FKW_CENARIO = FKW_CENARIO;
 
