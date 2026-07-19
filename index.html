@@ -17,6 +17,12 @@
      laterais em paisagem. Os controles usam env(safe-area-inset-*) no CSS
      para não ficarem embaixo da câmera. -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<script>
+  // Bloqueia o pinch-zoom no iOS antigo: Safari ignora o user-scalable=no do
+  // viewport (o touch-action:none do CSS já cobre iOS moderno e Android).
+  document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+  document.addEventListener("gesturechange", function (e) { e.preventDefault(); });
+</script>
 <title>Free Kick World ⚽</title>
 <link rel="stylesheet" href="css/game.css" />
 <!-- Fonte Rajdhani (mesma do Projeto Armor): usada no perfil recriado em código
